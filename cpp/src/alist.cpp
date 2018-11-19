@@ -9,14 +9,16 @@ SimpleMatrix::SimpleMatrix(int n, int m, int *mat)
 {
     N = n;
     M = m;
+    matrix = mat;
+    matrix_delete = false;
+}
 
-    if (mat != NULL) {
-        matrix = mat;
-        matrix_delete = false;
-    } else {
-        matrix = new int[n*m];
-        matrix_delete = true;
-    }
+SimpleMatrix::SimpleMatrix(int n, int m)
+{
+    N = n;
+    M = m;
+    matrix = new int[n*m];
+    matrix_delete = true;
 }
 
 SimpleMatrix::~SimpleMatrix()
@@ -36,7 +38,6 @@ void SimpleMatrix::print()
     for (r=0; r<M; r++) {
         for (c=0; c<N; c++) {
             //cout << "(" << r*(sm->N)+c << ")" << sm->matrix[r*(sm->N)+c] << " ";
-            cout << "idx: " << r*N+c << " ";
             cout << matrix[r*N+c] << " ";
         }
         cout << endl;
@@ -104,7 +105,6 @@ AlistMatrix::AlistMatrix(AlistMatrix &clone)
         }
     }
 
-    int cntm = 0;
     // M list
     for (int i=0; i<M; i++) {
         for (int j=0; j<num_mlist[i]; j++) {
@@ -254,8 +254,6 @@ void AlistMatrix::simple2alist(SimpleMatrix *sm)
     N = sm->getN();
     M = sm->getM();
 
-    int *matrix = sm->getMatrix();
-
     // Biggest number of entries n and m
     num_nlist = new int[N];
     num_mlist = new int[M];
@@ -279,6 +277,53 @@ void AlistMatrix::simple2alist(SimpleMatrix *sm)
     simple_matrix_nm_list(sm);
 
     return;
+}
+
+// Alist to Simple Matrix using the M list (meant for testing)
+SimpleMatrix * AlistMatrix::alist2simple_M(void)
+{
+    SimpleMatrix *sm = new SimpleMatrix(N, M);
+    int *mat = sm->getMatrix();
+
+    int r, c;
+
+    for (r=0; r<M; r++) {
+        //cout << "Entries: " << entries << endl;
+        int entry = 0;
+        for (c=0; c<N; c++) {
+            int idx = r*N+c;
+
+            if (mlist[r][entry].idx-1 == c) {
+                //cout << "Entry: " << entry << " ";
+                mat[idx] = *mlist[r][entry].value;
+                ++entry;
+            } else {
+                mat[idx] = 0;
+            }
+        }
+        cout << endl;
+    }
+
+#if 0
+    cout << "M list: " << endl;
+    for (int i=0; i<M; i++) {
+        for (int j=0; j<num_mlist[i]; j++) {
+            //cout << al->mlist[i][j].idx << ",";
+            cout << mlist[i][j].idx << "(" << *mlist[i][j].value << "),";
+        }
+        cout << endl;
+    }
+    cout << endl;
+#endif
+
+    return sm;
+
+}
+
+// Alist to Simple Matrix using the N list (meant for testing)
+SimpleMatrix * AlistMatrix::alist2simple_N(void)
+{
+    return NULL;
 }
 
 

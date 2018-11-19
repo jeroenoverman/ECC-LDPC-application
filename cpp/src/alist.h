@@ -9,6 +9,7 @@ class SimpleMatrix {
 
     public:
         SimpleMatrix(int m, int n, int *mat);
+        SimpleMatrix(int m, int n);
         ~SimpleMatrix();
 
         int getM() {return M;}
@@ -59,6 +60,10 @@ class AlistMatrix {
         void Mul(int *vector, int *result);
 
         void clear(); // Set all .value to zero. Keeps entries
+
+        // Testing
+        SimpleMatrix *alist2simple_N(void);
+        SimpleMatrix *alist2simple_M(void);
 
     private:
         void simple_matrix_biggest_nm(SimpleMatrix *sm);
