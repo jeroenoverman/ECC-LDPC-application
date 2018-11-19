@@ -4,17 +4,17 @@
 class SimpleMatrix {
     int N; // number of columns
     int M; // number of rows
-    int *matrix;
+    double *matrix;
     bool matrix_delete;
 
     public:
-        SimpleMatrix(int m, int n, int *mat);
+        SimpleMatrix(int m, int n, double *mat);
         SimpleMatrix(int m, int n);
         ~SimpleMatrix();
 
         int getM() {return M;}
         int getN() {return N;}
-        int *getMatrix() {return matrix;}
+        double *getMatrix() {return matrix;}
 
         void print();
 };
@@ -46,7 +46,15 @@ class AlistMatrix {
         int *num_mlist; // weight of each row m
 
         AlistMatrix() {};
+        AlistMatrix(int m, int n, int biggest_m, int biggest_n);
         AlistMatrix(AlistMatrix &clone);
+
+        void alloc_values(void) {
+            // should be the same as biggest_num_m * M
+            values = new alistval_t[biggest_num_n * N];
+        }
+        void free_values(void){delete values;}
+
         // Setters
         void setGF(int q) {GF = q;}
         void setNM(int m, int n) {M = m; N = n;}
@@ -54,6 +62,8 @@ class AlistMatrix {
         int getM() {return M;}
         int getN() {return N;}
         int getGF() {return GF;}
+        int getBiggestNumM() {return biggest_num_m;}
+        int getBiggestNumN() {return biggest_num_n;}
 
         void simple2alist(SimpleMatrix *sm);
         void print();

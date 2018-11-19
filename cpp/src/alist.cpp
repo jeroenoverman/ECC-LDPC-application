@@ -5,7 +5,7 @@
 
 using namespace std;
 
-SimpleMatrix::SimpleMatrix(int n, int m, int *mat)
+SimpleMatrix::SimpleMatrix(int n, int m, double *mat)
 {
     N = n;
     M = m;
@@ -17,7 +17,7 @@ SimpleMatrix::SimpleMatrix(int n, int m)
 {
     N = n;
     M = m;
-    matrix = new int[n*m];
+    matrix = new double[n*m];
     matrix_delete = true;
 }
 
@@ -38,7 +38,13 @@ void SimpleMatrix::print()
     for (r=0; r<M; r++) {
         for (c=0; c<N; c++) {
             //cout << "(" << r*(sm->N)+c << ")" << sm->matrix[r*(sm->N)+c] << " ";
-            cout << matrix[r*N+c] << " ";
+            //cout << matrix[r*N+c] << " ";
+            double val = matrix[r*N+c];
+            if (val < 0) {
+                printf("%1.2f ", val);
+            } else {
+                printf(" %1.2f ", val);
+            }
         }
         cout << endl;
     }
@@ -47,6 +53,40 @@ void SimpleMatrix::print()
 /////////
 /////////
 /////////
+
+AlistMatrix::AlistMatrix(int m, int n, int biggest_m, int biggest_n)
+{
+    M = m;
+    N = n;
+
+    biggest_num_m = biggest_m;
+    biggest_num_n = biggest_n;
+
+    // Biggest number of entries n and m
+    num_nlist = new int[N];
+    num_mlist = new int[M];
+
+    // Assume that all have the same number of entries
+    for (int i=0; i<N; i++) {
+        num_nlist[i] = biggest_num_n;
+    }
+    for (int i=0; i<M; i++) {
+        num_mlist[i] = biggest_num_m;
+    }
+
+    // Actual storage of the values, nodes hold pointers
+    alloc_values();
+
+    // Build N and M lists
+    nlist = new alist_entry*[N];
+    for (int i=0; i<N; i++) {
+        nlist[i] = new alist_entry[biggest_num_n];
+    }
+    mlist = new alist_entry*[M];
+    for (int i=0; i<M; i++) {
+        mlist[i] = new alist_entry[biggest_num_m];
+    }
+}
 
 AlistMatrix::AlistMatrix(AlistMatrix &clone)
 {
@@ -60,7 +100,7 @@ AlistMatrix::AlistMatrix(AlistMatrix &clone)
     num_nlist = new int[N];
     num_mlist = new int[M];
 
-    values = new alistval_t[biggest_num_n * biggest_num_m];
+    alloc_values();
 
     // Map the value pointers between the N and M list
     // so that changing a value in the Nlist is reflected in the M list
@@ -145,7 +185,7 @@ void AlistMatrix::simple_matrix_biggest_nm(SimpleMatrix *sm)
 
     int n = sm->getN();
     int m = sm->getM();
-    int *matrix = sm->getMatrix();
+    double *matrix = sm->getMatrix();
 
     biggest_num_n = 0;
     biggest_num_m = 0;
@@ -198,7 +238,7 @@ void AlistMatrix::simple_matrix_nm_list(SimpleMatrix *sm)
     int m = sm->getM();
 
     int ncnt = 0, mcnt = 0;
-    int *matrix = sm->getMatrix();
+    double *matrix = sm->getMatrix();
 
     // Map the value pointers between the N and M list
     // so that changing a value in the Nlist is reflected in the M list
@@ -210,7 +250,7 @@ void AlistMatrix::simple_matrix_nm_list(SimpleMatrix *sm)
     for (c=0; c<n; c++) {
         for (r=0; r<m; r++) {
             int idx = IDX_MAT_ARRAY(c,r,n);
-            int val = matrix[idx];
+            alistval_t val = matrix[idx];
             //cout << r+ m*c << "|";
             if (val != 0) {
                 nlist[c][ncnt].idx = r+1;
@@ -233,7 +273,7 @@ void AlistMatrix::simple_matrix_nm_list(SimpleMatrix *sm)
     for (r=0; r<m; r++) {
         for (c=0; c<n; c++) {
             int idx = IDX_MAT_ARRAY(c,r,n);
-            int val = matrix[idx];
+            alistval_t val = matrix[idx];
             //cout << c*m+ r << "|";
             if (val != 0) {
                 mlist[r][mcnt].idx = c+1;
@@ -261,8 +301,7 @@ void AlistMatrix::simple2alist(SimpleMatrix *sm)
     simple_matrix_biggest_nm(sm);
 
     // Actual storage of the values, nodes hold pointers
-    values = new alistval_t[biggest_num_n * biggest_num_m];
-
+    alloc_values();
 
     // Build N and M lists
     nlist = new alist_entry*[N];
@@ -283,7 +322,7 @@ void AlistMatrix::simple2alist(SimpleMatrix *sm)
 SimpleMatrix * AlistMatrix::alist2simple_M(void)
 {
     SimpleMatrix *sm = new SimpleMatrix(N, M);
-    int *mat = sm->getMatrix();
+    double *mat = sm->getMatrix();
 
     int r, c;
 
@@ -293,8 +332,9 @@ SimpleMatrix * AlistMatrix::alist2simple_M(void)
         for (c=0; c<N; c++) {
             int idx = r*N+c;
 
-            if (mlist[r][entry].idx-1 == c) {
-                //cout << "Entry: " << entry << " ";
+            //cout << "Read mlist r=" << r << " entry=" << entry << " idx=" << idx << endl;
+            if (entry < num_mlist[r] && mlist[r][entry].idx-1 == c) {
+                //cout << "Entry found: " << entry << endl;
                 mat[idx] = *mlist[r][entry].value;
                 ++entry;
             } else {

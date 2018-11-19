@@ -7,50 +7,27 @@
 #include <cmath>
 #include "alist.h"
 
+#include "LDPC_beliefprop.h"
+
 using namespace std;
-
-
-class LDPC_BeliefProp {
-    int n_iterations; // Maximum number of iterations
-    
-    double *L; // Likelehood vector
-    
-    public:
-        /* Public for debugging */
-        AlistMatrix *H; // Parity check matrix (should become alist)
-        AlistMatrix *beliefMat; // Belief matrix (should become alist)
-        double *beliefMat_sumvec; // Sum of column and L (vector)
-        
-        LDPC_BeliefProp(AlistMatrix *pcm_h, double *likelihood);
-        
-        void setIterations(int it) {
-            n_iterations = it;
-        }
-        
-        void setParityCheckMatrix() {
-        }
-        
-        void prepare(); // Preperations before first step 1
-        void step_1(); // Do step 1
-        void step_2(); // Do step 2
-        void iterate(); // Do a whole iteration
-        void run(); // Do n itterations (whole decode process)
-        
-    private:
-        void init();
-};
 
 LDPC_BeliefProp::LDPC_BeliefProp(AlistMatrix *pcm_h, double *likelihood) {
     H = pcm_h;
     L = likelihood;
     n_iterations = 2;
-    
+
     init(); // Allocate space
 }
 
-
 void LDPC_BeliefProp::init() {
-    beliefMat = new AlistMatrix(*H); // TODO Make able to init alist empty
+    int m, n, bn_m, bn_n;
+
+    m = H->getM();
+    n = H->getN();
+    bn_m = H->getBiggestNumM();
+    bn_n = H->getBiggestNumN();
+
+    beliefMat = new AlistMatrix(*H);
     beliefMat->clear();
     beliefMat_sumvec = new double[H->getN()];
     prepare();
@@ -84,14 +61,15 @@ void LDPC_BeliefProp::step_1() {
      * Loop the row entry elements, so step trough the matrix left->right top->bottom (lines)
      */
     int n_col = H->getN();
-    
+
     for (int n=0; n<n_col; n++) {
         // Loop the actual entries (columns)
         for (int m=0; m<H->num_nlist[n]; m++) {
             int sumvec_idx = beliefMat->nlist[n][m].idx - 1;
             alist_entry *entry = &beliefMat->nlist[n][m];
-            
-            *entry->value = beliefMat_sumvec[sumvec_idx] - *entry->value;
+            cout << "IDX-1=" << sumvec_idx << " sumvec[n]=" << beliefMat_sumvec[n] << " old value=" << *entry->value;
+            *entry->value = beliefMat_sumvec[n] - *entry->value;
+            cout << " new value=" << *entry->value << endl;
         }
     }
 }
@@ -106,7 +84,7 @@ template <typename T> int sgn(T val) {
  * Step 2: Check -> Var
  */
 void LDPC_BeliefProp::step_2() {
-    
+
     // Loop row entries in H (For each check vector)
     for () {
         vector<double> Lnew_vec;
@@ -127,14 +105,14 @@ void LDPC_BeliefProp::step_2() {
             }
             Lnew_vec.push_back(signv * minv);
         }
-        
+
         // Assign the new likelehoods
         // Loop the column entries in H
         for () {
             //beliefMat[row,col_entry] = Lnew_vec(new_entry);
         }
     }
-    
+
     // Sum and est
 }
 #endif /*STEP2*/
@@ -144,43 +122,5 @@ void LDPC_BeliefProp::iterate() {
 }
 
 void LDPC_BeliefProp::run() {
-
-}
-
-int ml_H[] = {
-1,1,0,1,0,0,0,
-0,1,1,0,1,0,0,
-0,0,1,1,0,1,0,
-0,0,0,1,1,0,1,
-1,0,0,0,1,1,0,
-0,1,0,0,0,1,1,
-1,0,1,0,0,0,1,
-};
-
-double ml_L[] = {
-+0.9, +0.1, +0.3, +0.8, +1.0, -0.2, -0.3
-};
-
-int main() 
-{
-    cout << "Starting beliefe propegation" << endl;
-    
-    SimpleMatrix sm_h(7, 7, ml_H);
-    AlistMatrix al_h;
-    al_h.simple2alist(&sm_h);
-    LDPC_BeliefProp bp(&al_h, ml_L);
-    
-    cout << "Initial belfiefMat" << endl;
-    bp.beliefMat->print();
-    
-    bp.step_1();
-    
-    cout << "H matrix" << endl;
-    bp.H->print();
-    cout << "After step 1" << endl;
-    bp.beliefMat->print();
-    
-
-    return 1;
 
 }

@@ -6,11 +6,12 @@ using namespace std;
 #include <cstring>
 
 #include "alist.h"
+#include "LDPC_beliefprop.h"
 
 TEST_CASE("Simple Matrix")
 {
 
-    int simple_mat[] =
+    double simple_mat[] =
     {
         1, -1, 2,
         1, -3, 1
@@ -25,7 +26,7 @@ TEST_CASE("Simple Matrix")
 
 TEST_CASE("Simple Matrix to Alist Matrix")
 {
-    int exmat[] =
+    double exmat[] =
     {
         0,  0,  0,  27, 0,  0,  1,  0,  0,  36, 0,  0,  0,  0,  0,  49,
         0,  0,  0,  60, 45, 0,  0,  0,  32, 0,  0,  0,  0,  0,  23, 0,
@@ -51,11 +52,67 @@ TEST_CASE("Simple Matrix to Alist Matrix")
 
     REQUIRE(sm.getMatrix() == exmat);
 
-    int *smmat = sm.getMatrix();
-    int *sm2mat = sm2->getMatrix();
+    double *smmat = sm.getMatrix();
+    double *sm2mat = sm2->getMatrix();
 
     for (int i=0; i<(16*8); i++) {
         REQUIRE(sm2mat[i] == smmat[i]);
     }
 }
 
+
+// Belief Prop. test
+double ml_H[] = {
+    1,1,0,1,0,0,0,
+    0,1,1,0,1,0,0,
+    0,0,1,1,0,1,0,
+    0,0,0,1,1,0,1,
+    1,0,0,0,1,1,0,
+    0,1,0,0,0,1,1,
+    1,0,1,0,0,0,1,
+};
+
+double ml_L[] = {
+    +0.9, +0.1, +0.3, +0.8, +1.0, -0.2, -0.3
+};
+
+#if 1
+TEST_CASE("Belief Propagation")
+{
+    cout << "Starting beliefe propegation" << endl;
+
+    SimpleMatrix sm_h(7, 7, ml_H);
+    sm_h.print();
+
+    AlistMatrix al_h;
+    al_h.simple2alist(&sm_h);
+    cout << "H matrix" << endl;
+    al_h.print();
+    al_h.alist2simple_M()->print();
+
+    LDPC_BeliefProp bp(&al_h, ml_L);
+
+    cout << "Initial belfiefMat" << endl;
+    bp.beliefMat->print();
+    bp.beliefMat->alist2simple_M()->print();
+
+    bp.step_1();
+
+    cout << "";
+    cout << "beliefMat after step 1" << endl;
+    bp.beliefMat->print();
+    bp.beliefMat->alist2simple_M()->print();
+
+    cout << "";
+    cout << "beliefMat after step 2" << endl;
+    bp.beliefMat->print();
+    bp.beliefMat->alist2simple_M()->print();
+
+    //cout << "H matrix" << endl;
+    //bp.H->print();
+    //cout << "After step 1" << endl;
+    //bp.beliefMat->print();
+
+
+}
+#endif
