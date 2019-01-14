@@ -7,7 +7,11 @@
 #include "alist.h"
 
 class LDPC_BeliefProp {
-    int n_iterations; // Maximum number of iterations
+    /* Constants */
+    static const int DEFAULT_ITERATIONS = 3;
+
+    int n_iterations = DEFAULT_ITERATIONS; // Maximum number of iterations
+    int completed_iterations = 0;
 
     double *L; // Likelehood vector
 
@@ -25,14 +29,13 @@ class LDPC_BeliefProp {
         n_iterations = it;
     }
 
-    void setParityCheckMatrix() {
-    }
-
     void prepare(); // Preperations before first step 1
     void step_1(); // Do step 1
     void step_2(); // Do step 2
     void iterate(); // Do a whole iteration
-    void run(); // Do n itterations (whole decode process)
+    void run(int iterations = 0); // Do n itterations (whole decode process)
+
+    void incrIterations() {completed_iterations++;};
 
     void finalize();
     int translate(double); // Translate belief prop to binary

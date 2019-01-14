@@ -129,5 +129,10 @@ TEST_CASE("Belief Propagation")
     bp.beliefMat->print();
     bp.beliefMat->alist2simple_M()->print();
 
+    bp.run(3);
+
+    bp.finalize();
+    bp.print_result();
+
 }
 #endif

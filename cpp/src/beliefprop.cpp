@@ -15,8 +15,6 @@ using namespace std;
 LDPC_BeliefProp::LDPC_BeliefProp(AlistMatrix *pcm_h, double *likelihood) {
     H = pcm_h;
     L = likelihood;
-    n_iterations = 2;
-
     init(); // Allocate space
 }
 
@@ -127,11 +125,15 @@ void LDPC_BeliefProp::step_2() {
 }
 
 void LDPC_BeliefProp::iterate() {
-
+    step_1();
+    step_2();
+    incrIterations();
 }
 
-void LDPC_BeliefProp::run() {
-
+void LDPC_BeliefProp::run(int iterations) {
+    for (int i=0; i<(iterations ? iterations : n_iterations); i++) {
+        iterate();
+    }
 }
 
 void LDPC_BeliefProp::finalize(void) {
@@ -149,17 +151,19 @@ int LDPC_BeliefProp::translate(double ll) {
 }
 
 void LDPC_BeliefProp::print_sumvec(void) {
+    int i;
     cout << "Sum Vector: [";
-    for (int i=0; i<H->getN(); i++) {
+    for (i=0; i<H->getN()-1; i++) {
         cout << beliefMat_sumvec[i] << ", ";
     }
-    cout << "]" << endl;
+    cout << beliefMat_sumvec[i] << "]" << endl;
 }
 
 void LDPC_BeliefProp::print_result(void) {
+    int i;
     cout << "Result: [";
-    for (int i=0; i<H->getN(); i++) {
+    for (i=0; i<H->getN()-1; i++) {
         cout << result[i] << ", ";
     }
-    cout << "]" << endl;
+    cout << result[i] << "]" << endl;
 }
