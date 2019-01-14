@@ -16,8 +16,10 @@ class LDPC_BeliefProp {
     AlistMatrix *H; // Parity check matrix (should become alist)
     AlistMatrix *beliefMat; // Belief matrix (should become alist)
     double *beliefMat_sumvec; // Sum of column and L (vector)
+    int *result;
 
     LDPC_BeliefProp(AlistMatrix *pcm_h, double *likelihood);
+    ~LDPC_BeliefProp();
 
     void setIterations(int it) {
         n_iterations = it;
@@ -31,6 +33,12 @@ class LDPC_BeliefProp {
     void step_2(); // Do step 2
     void iterate(); // Do a whole iteration
     void run(); // Do n itterations (whole decode process)
+
+    void finalize();
+    int translate(double); // Translate belief prop to binary
+
+    void print_sumvec(void);
+    void print_result(void);
 
     private:
     void init();

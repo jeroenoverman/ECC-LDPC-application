@@ -99,20 +99,35 @@ TEST_CASE("Belief Propagation")
     bp.step_1();
 
     cout << "";
-    cout << "beliefMat after step 1" << endl;
+    cout << "Iter 1 beliefMat after step 1" << endl;
     bp.beliefMat->print();
     bp.beliefMat->alist2simple_M()->print();
+
+    bp.step_2();
 
     cout << "";
-    cout << "beliefMat after step 2" << endl;
+    bp.print_sumvec();
+    cout << "Iter 1 beliefMat after step 2" << endl;
     bp.beliefMat->print();
     bp.beliefMat->alist2simple_M()->print();
 
-    //cout << "H matrix" << endl;
-    //bp.H->print();
-    //cout << "After step 1" << endl;
-    //bp.beliefMat->print();
 
+    // ITER 2 //
+
+    bp.step_1();
+
+    cout << "";
+    cout << "Iter 2 beliefMat after step 1" << endl;
+    bp.beliefMat->print();
+    bp.beliefMat->alist2simple_M()->print();
+
+    bp.step_2();
+
+    cout << "";
+    bp.print_sumvec();
+    cout << "Iter 2 beliefMat after step 2" << endl;
+    bp.beliefMat->print();
+    bp.beliefMat->alist2simple_M()->print();
 
 }
 #endif
