@@ -61,9 +61,9 @@ void LDPC_BeliefProp::step_1() {
         for (int m=0; m<H->num_nlist[n]; m++) {
             int sumvec_idx = beliefMat->nlist[n][m].idx - 1;
             alist_entry *entry = &beliefMat->nlist[n][m];
-            cout << "IDX-1=" << sumvec_idx << " sumvec[n]=" << beliefMat_sumvec[n] << " old value=" << *entry->value;
+            //cout << "IDX-1=" << sumvec_idx << " sumvec[n]=" << beliefMat_sumvec[n] << " old value=" << *entry->value;
             *entry->value = beliefMat_sumvec[n] - *entry->value;
-            cout << " new value=" << *entry->value << endl;
+            //cout << " new value=" << *entry->value << endl;
         }
     }
 }

@@ -6,7 +6,6 @@ using namespace std;
 #include <cstring>
 
 #include "alist.h"
-#include "LDPC_beliefprop.h"
 
 TEST_CASE("Simple Matrix")
 {
@@ -59,80 +58,3 @@ TEST_CASE("Simple Matrix to Alist Matrix")
         REQUIRE(sm2mat[i] == smmat[i]);
     }
 }
-
-
-// Belief Prop. test
-double ml_H[] = {
-    1,1,0,1,0,0,0,
-    0,1,1,0,1,0,0,
-    0,0,1,1,0,1,0,
-    0,0,0,1,1,0,1,
-    1,0,0,0,1,1,0,
-    0,1,0,0,0,1,1,
-    1,0,1,0,0,0,1,
-};
-
-double ml_L[] = {
-    +0.9, +0.1, +0.3, +0.8, +1.0, -0.2, -0.3
-};
-
-#if 1
-TEST_CASE("Belief Propagation")
-{
-    cout << "Starting beliefe propegation" << endl;
-
-    SimpleMatrix sm_h(7, 7, ml_H);
-    sm_h.print();
-
-    AlistMatrix al_h;
-    al_h.simple2alist(&sm_h);
-    cout << "H matrix" << endl;
-    al_h.print();
-    al_h.alist2simple_M()->print();
-
-    LDPC_BeliefProp bp(&al_h, ml_L);
-
-    cout << "Initial belfiefMat" << endl;
-    bp.beliefMat->print();
-    bp.beliefMat->alist2simple_M()->print();
-
-    bp.step_1();
-
-    cout << "";
-    cout << "Iter 1 beliefMat after step 1" << endl;
-    bp.beliefMat->print();
-    bp.beliefMat->alist2simple_M()->print();
-
-    bp.step_2();
-
-    cout << "";
-    bp.print_sumvec();
-    cout << "Iter 1 beliefMat after step 2" << endl;
-    bp.beliefMat->print();
-    bp.beliefMat->alist2simple_M()->print();
-
-
-    // ITER 2 //
-
-    bp.step_1();
-
-    cout << "";
-    cout << "Iter 2 beliefMat after step 1" << endl;
-    bp.beliefMat->print();
-    bp.beliefMat->alist2simple_M()->print();
-
-    bp.step_2();
-
-    cout << "";
-    bp.print_sumvec();
-    cout << "Iter 2 beliefMat after step 2" << endl;
-    bp.beliefMat->print();
-    bp.beliefMat->alist2simple_M()->print();
-
-    bp.run(3);
-
-    bp.finalize();
-    bp.print_result();
-
-}
-#endif

@@ -6,9 +6,15 @@ include_directories(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
-add_executable("tests_${PROJECT_NAME}"
+add_executable("test_alist"
+    "${PROJECT_SOURCE_DIR}/test/test_alist.cpp"
+    "${PROJECT_SOURCE_DIR}/test/test.cpp"
+    "${PROJECT_SOURCE_DIR}/src/alist.cpp"
+    )
+
+add_executable("test_ldpc_beliefprop"
+    "${PROJECT_SOURCE_DIR}/test/test_ldpc_beliefprop.cpp"
+    "${PROJECT_SOURCE_DIR}/test/test.cpp"
     "${PROJECT_SOURCE_DIR}/src/alist.cpp"
     "${PROJECT_SOURCE_DIR}/src/beliefprop.cpp"
-    "${PROJECT_SOURCE_DIR}/test/test.cpp"
-    "${PROJECT_SOURCE_DIR}/test/test_alist.cpp"
     )
