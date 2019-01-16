@@ -18,3 +18,9 @@ add_executable("test_ldpc_beliefprop"
     "${PROJECT_SOURCE_DIR}/src/alist.cpp"
     "${PROJECT_SOURCE_DIR}/src/beliefprop.cpp"
     )
+
+add_executable("test_bpsk"
+    "${PROJECT_SOURCE_DIR}/test/test_bpsk.cpp"
+    "${PROJECT_SOURCE_DIR}/src/bpsk.cpp"
+    "${PROJECT_SOURCE_DIR}/test/test.cpp"
+    )
