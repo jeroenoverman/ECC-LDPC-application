@@ -24,3 +24,10 @@ add_executable("test_bpsk"
     "${PROJECT_SOURCE_DIR}/src/bpsk.cpp"
     "${PROJECT_SOURCE_DIR}/test/test.cpp"
     )
+
+add_executable("test_awgn"
+    "${PROJECT_SOURCE_DIR}/test/test_awgn.cpp"
+    "${PROJECT_SOURCE_DIR}/src/bpsk.cpp"
+    "${PROJECT_SOURCE_DIR}/src/awgn.cpp"
+    "${PROJECT_SOURCE_DIR}/test/test.cpp"
+    )
