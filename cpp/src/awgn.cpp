@@ -14,20 +14,10 @@ void AWGN::apply(double *dst_signal, double *src_signal, int size, double Eb_N0_
     auto randn = std::bind(std::normal_distribution<double>{0.0, sqrt(1.0)}, // mean 0, var 1
             std::mt19937(std::random_device{}()));
 
-    // SNR = Eb_N0 + 3 + 10log10(k)
-    //double snr = Eb_N0_dB + 3 + 10*log10(size);
-    // Eb/N0 = SNR => 1/N0 = SNR => N0 = 1/SNR
+    // Eb/N0 = SNR
     double snr = Eb_N0_dB;
     double lin_snr = pow(10, (snr/10));
 
-    /* Compute symbol energy */
-#if 0 /* Is always 1 for BPSK */
-    double sum = 0.0;
-    for (int i=0; i<size; i++) {
-        sum += pow(abs(src_signal[i]), 2);
-    }
-    double Eb = sum/size;
-#endif
     const double Eb = 1;
     double N0 = Eb/lin_snr;
 
