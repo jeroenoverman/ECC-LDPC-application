@@ -16,13 +16,12 @@ void AWGN::apply(double *dst_signal, double *src_signal, int size, double Eb_N0_
 
     // Eb/N0 = SNR
     double snr = Eb_N0_dB;
-    double lin_snr = pow(10, (snr/10));
+    double lin_snr = snr_db2lin(snr);
 
     const double Eb = 1;
     double N0 = Eb/lin_snr;
 
-    /* Add noise, input is real */
-    double noiseSigma = sqrt(N0);
+    double noiseSigma = sqrt(N0/2);
     for (int i=0; i<size; i++) {
         dst_signal[i] = src_signal[i] + noiseSigma * randn();
     }
