@@ -40,7 +40,7 @@ TEST_CASE("Simple Matrix to Alist Matrix")
     SimpleMatrix sm(16, 8, exmat);
 
     //sm.print();
-    cout << endl << endl;
+    //cout << endl << endl;
 
     AlistMatrix al;
     al.simple2alist(&sm);

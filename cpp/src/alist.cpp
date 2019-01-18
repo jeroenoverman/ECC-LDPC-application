@@ -341,7 +341,7 @@ SimpleMatrix * AlistMatrix::alist2simple_M(void)
                 mat[idx] = 0;
             }
         }
-        cout << endl;
+        //cout << endl;
     }
 
 #if 0
