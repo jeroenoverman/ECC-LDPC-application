@@ -5,7 +5,7 @@
 
 using namespace std;
 
-SimpleMatrix::SimpleMatrix(int n, int m, double *mat)
+SimpleMatrix::SimpleMatrix(int m, int n, double *mat)
 {
     N = n;
     M = m;
@@ -13,7 +13,7 @@ SimpleMatrix::SimpleMatrix(int n, int m, double *mat)
     matrix_delete = false;
 }
 
-SimpleMatrix::SimpleMatrix(int n, int m)
+SimpleMatrix::SimpleMatrix(int m, int n)
 {
     N = n;
     M = m;
