@@ -1,6 +1,8 @@
 #ifndef ALIST_H__
 #define ALIST_H__
 
+#include <string>
+
 class SimpleMatrix {
     int N; // number of columns
     int M; // number of rows
@@ -48,6 +50,7 @@ class AlistMatrix {
         AlistMatrix() {};
         AlistMatrix(int m, int n, int biggest_m, int biggest_n);
         AlistMatrix(AlistMatrix &clone);
+        AlistMatrix(std::string alist_file);
 
         void alloc_values(void) {
             // should be the same as biggest_num_m * M
@@ -61,6 +64,7 @@ class AlistMatrix {
         //getters
         int getM() {return M;}
         int getN() {return N;}
+        int getK() {return N-M;};
         int getGF() {return GF;}
         int getBiggestNumM() {return biggest_num_m;}
         int getBiggestNumN() {return biggest_num_n;}
@@ -78,6 +82,7 @@ class AlistMatrix {
     private:
         void simple_matrix_biggest_nm(SimpleMatrix *sm);
         void simple_matrix_nm_list(SimpleMatrix *sm);
+        void map_nm();
 
 };
 

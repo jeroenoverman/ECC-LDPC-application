@@ -25,13 +25,6 @@ LDPC_BeliefProp::~LDPC_BeliefProp() {
 }
 
 void LDPC_BeliefProp::init() {
-    int m, n, bn_m, bn_n;
-
-    m = H->getM();
-    n = H->getN();
-    bn_m = H->getBiggestNumM();
-    bn_n = H->getBiggestNumN();
-
     beliefMat = new AlistMatrix(*H);
     beliefMat->clear();
     beliefMat_sumvec = new double[H->getN()];
@@ -59,8 +52,8 @@ void LDPC_BeliefProp::step_1() {
     for (int n=0; n<n_col; n++) {
         // Loop the actual entries (columns)
         for (int m=0; m<H->num_nlist[n]; m++) {
-            int sumvec_idx = beliefMat->nlist[n][m].idx - 1;
             alist_entry *entry = &beliefMat->nlist[n][m];
+            //int sumvec_idx = beliefMat->nlist[n][m].idx - 1;
             //cout << "IDX-1=" << sumvec_idx << " sumvec[n]=" << beliefMat_sumvec[n] << " old value=" << *entry->value;
             *entry->value = beliefMat_sumvec[n] - *entry->value;
             //cout << " new value=" << *entry->value << endl;

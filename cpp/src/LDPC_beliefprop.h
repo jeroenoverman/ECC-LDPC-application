@@ -40,10 +40,17 @@ class LDPC_BeliefProp {
     void finalize();
     int translate(double); // Translate belief prop to binary
 
+#if 0
     int * getResult(int *result_size = NULL) {
         if (result_size != NULL)
             *result_size = H->getN();
         return result;
+    }
+#endif
+    double * getResult(int *result_size = NULL) {
+        if (result_size != NULL)
+            *result_size = H->getN();
+        return beliefMat_sumvec;
     }
 
     AlistMatrix * getBeliefMat() {
