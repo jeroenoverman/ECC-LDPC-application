@@ -17,6 +17,7 @@ struct h_matrix {
 
 typedef struct BER_entry{
     double BER;
+    double BER_bf;
     double BER_no_ecc;
     double BER_no_ecc_theoretical;
 } BER_entry_t;
@@ -35,9 +36,10 @@ class LDPC_info {
         int K;
         double R;
 
-        void add_entry(double snr, double ber, double ber_no_ecc, double ber_no_ecc_th) {
+        void add_entry(double snr, double ber, double ber_bf, double ber_no_ecc, double ber_no_ecc_th) {
             BER_entry_t be;
             be.BER = ber;
+            be.BER_bf = ber_bf;
             be.BER_no_ecc = ber_no_ecc;
             be.BER_no_ecc_theoretical = ber_no_ecc_th;
 
@@ -64,8 +66,8 @@ class LDPC_info {
             std::cout << "LDPC Info for: \"" << name << "\" N=" << N << ", M=" << M << ", R=" << R << std::endl;
             for (auto snr : get_snr_vec()) {
                 BER_entry_t be = get_entry(snr);
-                printf("SNR: %1.1f\tBER (w/ bp): %1.8f\tBER (w/o bp): %1.8f\tBER (th awgn): %1.8f\n",
-                        snr, be.BER, be.BER_no_ecc, be.BER_no_ecc_theoretical);
+                printf("SNR: %1.1f\t| BER (w/ bp): %1.8f\t| BER (w/ bf): %1.8f\t| BER (w/o bp): %1.8f\t| BER (th awgn): %1.8f\n",
+                        snr, be.BER, be.BER_bf, be.BER_no_ecc, be.BER_no_ecc_theoretical);
             }
         }
 };

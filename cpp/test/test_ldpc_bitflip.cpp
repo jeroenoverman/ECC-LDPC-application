@@ -144,10 +144,21 @@ TEST_CASE("BitFlip Large H with AWGN")
     AlistMatrix al("H_n648-z27-r1_2.alist");
     vector<double> SNRdb_table {-5, -4, -3, -2, -1, -0.5, 0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8};
 
+    int info_size = 324;
+    int *r_bin_signal = new int[info_size];
+
+    /* Generate random binary signal of 1 block (K size) */
+    auto myrand = std::bind(std::uniform_int_distribution<int>{0, 1},
+            std::mt19937(std::random_device{}()));
+
+    for (int i=0; i<info_size; i++) {
+        r_bin_signal[i] = myrand();
+    }
+
     for (auto snr : SNRdb_table) {
 
         int *encoded_msg = new int[al.getN()];
-        LDPC_encode::encode(encoded_msg, test_U, &al);
+        LDPC_encode::encode(encoded_msg, r_bin_signal, &al);
 
         /* BPSK encoding */
         double *encoded_msg_flt =  new double[al.getN()];
@@ -160,7 +171,7 @@ TEST_CASE("BitFlip Large H with AWGN")
         int *decoded_msg_no_bp =  new int[al.getN()];
         BPSK::decode(decoded_msg_no_bp, encoded_msg_flt_awgn, al.getN());
 
-        double ber_no_bp = BPSK::ber(encoded_msg, decoded_msg_no_bp, al.getN());
+        double ber_no_bp = BPSK::ber(r_bin_signal, decoded_msg_no_bp, al.getK());
 
         /* Run BitFlip prop */
         LDPC_BitFlip bf(&al, decoded_msg_no_bp);

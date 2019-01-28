@@ -34,7 +34,7 @@ TEST_CASE("BER Simulation avg app")
     vector<string> files = {"H_n648-z27-r1_2.alist", "H_n648-z27-r5_6.alist"};
     ab.add_alist_files(files);
 
-    vector<double> SNRdb_list {-5, -4, -3, -2, -1, -0.5, 0, 0.5, 1, 2, 3, 4, 5, 7, 10};
+    vector<double> SNRdb_list {-5, -4, -3, -2, -1, -0.5, 0, 0.5, 1, 2, 3, 4, 5, 7, 10, 11, 12, 14, 16};
 
     // 5 runs per SNR, 8 iterations per belief prop decoding
     LDPC_info ldpc_info_r1_2;

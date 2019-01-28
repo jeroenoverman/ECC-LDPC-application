@@ -6,6 +6,7 @@
 #include "awgn.h"
 #include "LDPC_encode.h"
 #include "LDPC_beliefprop.h"
+#include "LDPC_bitflip.h"
 #include "LDPC_app_base.h"
 #include "LDPC_info.h"
 
@@ -112,6 +113,7 @@ void LDPC_app_base::run_bersim_app(LDPC_info &ldpc_info, vector<double> &SNRdb_l
     for (auto snr_db : SNRdb_list) {
         //cout << "SNR: " << snr_db << endl;
         double ber_avg = 0;
+        double ber_avg_bf = 0;
         double ber_avg_no_ecc = 0;
 
         /* Send over AWGN with BPSK modulation for different SNR */
@@ -128,9 +130,16 @@ void LDPC_app_base::run_bersim_app(LDPC_info &ldpc_info, vector<double> &SNRdb_l
 
             /* BPSK decoding WITHOUT Belief Prop (for demo comparison) */
             /* The message is the first 'info_size' bits of the codeword */
-            int *decoded_msg_no_bp =  new int[info_size];
-            BPSK::decode(decoded_msg_no_bp, encoded_msg_bpsk_received_no_bp, info_size);
+            int *decoded_msg_no_bp =  new int[code_size];
+            BPSK::decode(decoded_msg_no_bp, encoded_msg_bpsk_received_no_bp, code_size);
             double ber_no_ecc = BPSK::ber(r_bin_signal, decoded_msg_no_bp, info_size);
+
+            /* Run LDPC Bit Flipping */
+            LDPC_BitFlip bf(&al, decoded_msg_no_bp);
+            int bfiter = bf.run();
+            int *decoded_msg_bf = bf.result();
+            double ber_bf = BPSK::ber(r_bin_signal, decoded_msg_bf, info_size);
+            //cout << "BF iter: " << bfiter << " BER: " << ber_bf << endl;
 
             /* Run LDPC belief propagation */
             double *encoded_msg_bpsk_received;
@@ -145,6 +154,7 @@ void LDPC_app_base::run_bersim_app(LDPC_info &ldpc_info, vector<double> &SNRdb_l
             double ber = BPSK::ber(r_bin_signal, decoded_msg, info_size);
 
             ber_avg += ber;
+            ber_avg_bf += ber_bf;
             ber_avg_no_ecc += ber_no_ecc;
 
             //cout << "\t\tBER: " << ber << " total: " << ber_avg << endl;
@@ -156,12 +166,14 @@ void LDPC_app_base::run_bersim_app(LDPC_info &ldpc_info, vector<double> &SNRdb_l
             delete [] decoded_msg;
         }
         ber_avg = ber_avg/runs;
+        ber_avg_bf = ber_avg_bf/runs;
         ber_avg_no_ecc = ber_avg_no_ecc/runs;
         //cout << "\tAVG BER: " << ber_avg << endl;
 
         /* Add an entry for the SNR */
         BER_entry_t be;
         be.BER = ber_avg;
+        be.BER_bf = ber_avg_bf;
         be.BER_no_ecc = ber_avg_no_ecc;
         be.BER_no_ecc_theoretical = BPSK::ber_theoretical(snr_db);
         ldpc_info.add_entry(snr_db, be);
