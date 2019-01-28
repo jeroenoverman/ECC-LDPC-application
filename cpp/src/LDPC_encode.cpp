@@ -40,7 +40,7 @@ void LDPC_encode::encode(int *codeword, int *msg, AlistMatrix *H) {
 
     int _M = H->getM();
     int _N = H->getN();
-    int _K = _N/2;
+    int _K = H->getK();
     int _Z = 27;
 
 #if 0
@@ -57,7 +57,7 @@ void LDPC_encode::encode(int *codeword, int *msg, AlistMatrix *H) {
 #endif
 
     memset(codeword, 0, _N * sizeof(codeword[0]));
-    memcpy(codeword, msg, _M * sizeof(msg[0]));
+    memcpy(codeword, msg, _K * sizeof(msg[0]));
 
     std::vector<uint8_t > parity(_M, 0);
 
