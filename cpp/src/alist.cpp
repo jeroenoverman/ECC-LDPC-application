@@ -227,7 +227,7 @@ AlistMatrix::AlistMatrix(string alist_file)
                 vector<string> tokens(beg, end); // done!
 
                 for (int i=0; i<this->N; i++) {
-                    num_nlist[i] = stoi(tokens.at(i));
+                    num_nlist[i] = stoi(tokens[i]);
                 }
 
                 /* Build nlist */
@@ -248,7 +248,7 @@ AlistMatrix::AlistMatrix(string alist_file)
                 vector<string> tokens(beg, end); // done!
 
                 for (int i=0; i<this->M; i++) {
-                    num_mlist[i] = stoi(tokens.at(i));
+                    num_mlist[i] = stoi(tokens[i]);
                 }
 
                 /* Build mlist */
@@ -270,7 +270,7 @@ AlistMatrix::AlistMatrix(string alist_file)
 
                 for (int i=0; i<num_nlist[nlist_cnt]; i++) {
                     //cout << "nlist_cnt: " << nlist_cnt << " i: " << i << " token" << stoi(tokens.at(i)) << endl;
-                    nlist[nlist_cnt][i].idx = stoi(tokens.at(i));
+                    nlist[nlist_cnt][i].idx = stoi(tokens[i]);
                 }
 
                 if (++nlist_cnt == this->N) {
@@ -289,7 +289,7 @@ AlistMatrix::AlistMatrix(string alist_file)
 
                 for (int i=0; i<num_mlist[mlist_cnt]; i++) {
                     //cout << "mlist_cnt: " << mlist_cnt << " i: " << i << " token" << stoi(tokens.at(i)) << endl;
-                    mlist[mlist_cnt][i].idx = stoi(tokens.at(i));
+                    mlist[mlist_cnt][i].idx = stoi(tokens[i]);
                 }
 
                 if (++mlist_cnt == this->M) {
@@ -394,7 +394,7 @@ void AlistMatrix::map_nm(void)
         }
     }
 
-    delete idx_cnt;
+    delete [] idx_cnt;
 }
 
 void AlistMatrix::clear()

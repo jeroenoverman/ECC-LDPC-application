@@ -65,6 +65,7 @@ class AlistMatrix {
         int getM() {return M;}
         int getN() {return N;}
         int getK() {return N-M;};
+        double getR() {return (double)getK()/(double)N;};
         int getGF() {return GF;}
         int getBiggestNumM() {return biggest_num_m;}
         int getBiggestNumN() {return biggest_num_n;}
