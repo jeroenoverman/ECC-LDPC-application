@@ -1,5 +1,6 @@
 #include <iostream>
 #include <regex>
+#include <cstring>
 
 #include "alist.h"
 #include "bpsk.h"
@@ -136,7 +137,8 @@ void LDPC_app_base::run_bersim_app(LDPC_info &ldpc_info, vector<double> &SNRdb_l
 
             /* Run LDPC Bit Flipping */
             LDPC_BitFlip bf(&al, decoded_msg_no_bp);
-            int bfiter = bf.run();
+            //int bfiter = bf.run();
+            bf.run();
             int *decoded_msg_bf = bf.result();
             double ber_bf = BPSK::ber(r_bin_signal, decoded_msg_bf, info_size);
             //cout << "BF iter: " << bfiter << " BER: " << ber_bf << endl;
@@ -181,4 +183,128 @@ void LDPC_app_base::run_bersim_app(LDPC_info &ldpc_info, vector<double> &SNRdb_l
 
     delete [] r_bin_signal;
     delete [] encoded_msg;
+}
+
+void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
+        int *data_out_bp, int *data_out_bf, int *data_out_raw, int *data_in,
+        int size, double snr_db, int bp_iter, struct h_matrix *hm) {
+
+    if (hm == NULL) {
+        cout << "No H Matrix" << endl;
+        return;
+    }
+
+    /* Create LDPC object using the specified alist file */
+    AlistMatrix al(hm->alist_file);
+    int info_size = al.getK();
+    int code_size = al.getN();
+
+    int blocks = size/info_size;
+    int rest = size%info_size;
+
+    if (rest) {
+        ++blocks;
+    }
+
+    int *data_ptr = data_in;
+
+    double ber_total = 0;
+    double ber_bf_total = 0;
+    double ber_no_ecc_total = 0;
+
+    cout << "Blocks: " << blocks << " Rest: " << rest << endl;
+
+    for (int i=0; i<blocks; i++) {
+
+        /* Copy data int bufer */
+        int *data_buffer = new int[info_size];
+
+        int idx = i*info_size;
+        int size_bytes;
+        if (rest && (i == blocks-1)) {
+            // The last block if partial
+            size_bytes = sizeof(data_in[0])*rest;
+            //memset(data_buffer, 0, ((info_size-rest) * sizeof(data_in[0])));
+            memset(data_buffer, 0, sizeof(data_in[0])*info_size);
+            memcpy(data_buffer, data_ptr, size_bytes);
+            //cout << "Last block i: " << i << endl;
+        } else {
+            // The whole blocks
+            size_bytes = sizeof(data_in[0])*info_size;
+            memcpy(data_buffer, data_ptr, size_bytes);
+            //cout << "Block i: " << i << endl;
+        }
+        //cout << "Size bytes: " << size_bytes << endl;
+
+        /* Apply LDPC code */
+        int *encoded_msg = new int[code_size];
+        LDPC_encode::encode(encoded_msg, data_buffer, &al);
+
+        /* BPSK encoding */
+        double *encoded_msg_bpsk = new double[code_size];
+        BPSK::encode(encoded_msg_bpsk, encoded_msg, code_size);
+
+        /* Send over AWGN channel */
+        double *encoded_msg_bpsk_received_no_bp = new double[code_size];
+        AWGN::apply(encoded_msg_bpsk_received_no_bp, encoded_msg_bpsk, code_size, snr_db);
+
+        /* BPSK decoding WITHOUT Belief Prop (for demo comparison) */
+        /* The message is the first 'info_size' bits of the codeword */
+        int *decoded_msg_no_bp =  new int[code_size];
+        BPSK::decode(decoded_msg_no_bp, encoded_msg_bpsk_received_no_bp, code_size);
+        double ber_no_ecc = BPSK::ber(data_buffer, decoded_msg_no_bp, info_size);
+
+        /* Run LDPC Bit Flipping */
+        LDPC_BitFlip bf(&al, decoded_msg_no_bp);
+        bf.run();
+        int *decoded_msg_bf = bf.result();
+        double ber_bf = BPSK::ber(data_buffer, decoded_msg_bf, info_size);
+        //cout << "BF iter: " << bfiter << " BER: " << ber_bf << endl;
+
+        /* Run LDPC belief propagation */
+        double *encoded_msg_bpsk_received;
+        int msg_size;
+        LDPC_BeliefProp bp(&al, encoded_msg_bpsk_received_no_bp);
+        bp.run(bp_iter);
+        encoded_msg_bpsk_received = bp.getResult(&msg_size);
+
+        /* BPSK decoding with Belief Prop */
+        int *decoded_msg = new int[info_size];
+        BPSK::decode(decoded_msg, encoded_msg_bpsk_received, info_size);
+        double ber = BPSK::ber(data_buffer, decoded_msg, info_size);
+
+        ber_total += ber;
+        ber_bf_total += ber_bf;
+        ber_no_ecc_total += ber_no_ecc;
+
+        /* Copy decoded bits to the output */
+        memcpy(&data_out_bp[idx], decoded_msg, size_bytes); // Belief Prop
+        memcpy(&data_out_bf[idx], decoded_msg_bf, size_bytes); // Bit Flip
+        memcpy(&data_out_bf[idx], decoded_msg_no_bp, size_bytes); // Raw
+
+        /* Next block */
+        data_ptr = &data_ptr[info_size];
+
+        /* Free data */
+        delete [] data_buffer;
+        delete [] encoded_msg;
+        delete [] encoded_msg_bpsk;
+        delete [] encoded_msg_bpsk_received_no_bp;
+        delete [] decoded_msg_no_bp;
+        delete [] decoded_msg;
+
+        //cout << "Ber: " << ber << " Ber bf: " << ber_bf << " Ber no ecc: " << ber_no_ecc << endl;
+    }
+
+    ber_total = ber_total/blocks;
+    ber_bf_total = ber_bf_total/blocks;
+    ber_no_ecc_total = ber_no_ecc_total/blocks;
+
+    /* Add an entry for the SNR */
+    BER_entry_t be;
+    be.BER = ber_total;
+    be.BER_bf = ber_bf_total;
+    be.BER_no_ecc = ber_no_ecc_total;
+    be.BER_no_ecc_theoretical = BPSK::ber_theoretical(snr_db);
+    ldpc_info.add_entry(snr_db, be);
 }

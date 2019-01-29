@@ -22,6 +22,12 @@ class LDPC_app_base {
         void run_bersim_app(LDPC_info &ldpc_info,
                 std::vector<double> &SNRdb_list, int runs, int bp_iter, struct h_matrix *hm);
 
+        // Run LDPC on specific blocks
+
+        void run_data_app(LDPC_info &ldpc_info,
+                int *data_out_bp, int *data_out_bf, int *data_out_raw, int *data_in,
+                int size, double snr_db, int bp_iter, struct h_matrix *hm);
+
         void print_specs() {
             for (auto spec : h_matrices) {
                 std::cout << "Alist File: " << spec.alist_file <<
