@@ -30,7 +30,6 @@ TEST_CASE("Alist name parsing")
     REQUIRE((matrices->at(1)).R == 1.0/2.0);
 }
 
-#if 0
 TEST_CASE("BER Simulation avg app")
 {
     LDPC_app_base ab;
@@ -50,7 +49,6 @@ TEST_CASE("BER Simulation avg app")
 
     REQUIRE(true == true);
 }
-#endif
 
 TEST_CASE("Data app") {
     LDPC_app_base ab;
