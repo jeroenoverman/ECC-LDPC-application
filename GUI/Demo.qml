@@ -50,6 +50,7 @@ Page {
                     antialiasing: true
                     fillMode: Image.PreserveAspectFit
                     source: "image://ecc_source/original"
+                    cache: false
                 }
             }
 
@@ -60,6 +61,7 @@ Page {
                 fillMode: Image.PreserveAspectFit
                 source: "arrow.png"
                 width: 0.25 * parent.width - margin
+                cache: false
             }
 
             Column {
@@ -80,6 +82,7 @@ Page {
                     antialiasing: true
                     fillMode: Image.PreserveAspectFit
                     source: "image://ecc_source/none"
+                    cache: false
                 }
             }
 
@@ -101,6 +104,7 @@ Page {
                     antialiasing: true
                     fillMode: Image.PreserveAspectFit
                     source: "image://ecc_source/bitflip"
+                    cache: false
                 }
             }
         }
@@ -150,6 +154,7 @@ Page {
                     antialiasing: true
                     fillMode: Image.PreserveAspectFit
                     source: "image://ecc_source/logli"
+                    cache: false
                 }
             }
         }

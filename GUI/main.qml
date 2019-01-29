@@ -16,6 +16,12 @@ ApplicationWindow {
 
         Settings {
 
+            Component.onCompleted:  {
+                dataSource.set_AWGN_parameters(snr_demo.value)
+                dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value)
+                dataSource.set_graph_parameters(avg_iter.value, snr_range.first.value, snr_range.second.value, step_size.value)
+            }
+
             toolTip_snr_demo{
                 text: snr_demo.valueAt(snr_demo.position).toFixed(1)
             }

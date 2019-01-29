@@ -16,7 +16,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
     resourceimageprovider.cpp \
-    datasource.cpp
+    datasource.cpp \
+    alist.cpp \
+    awgn.cpp \
+    bpsk.cpp \
+    LDPC_app_base.cpp \
+    LDPC_beliefprop.cpp \
+    LDPC_bitflip.cpp \
+    LDPC_encode.cpp
 
 RESOURCES += qml.qrc
 
@@ -33,7 +40,19 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     resourceimageprovider.h \
-    datasource.h
+    datasource.h \
+    alist.h \
+    awgn.h \
+    bpsk.h \
+    LDPC_app_base.h \
+    LDPC_beliefprop.h \
+    LDPC_bitflip.h \
+    LDPC_encode.h \
+    LDPC_info.h
 
 DISTFILES += \
-    .gitignore
+    .gitignore \
+    H_n648-z27-r1_2.alist \
+    H_n648-z27-r2_3.alist \
+    H_n648-z27-r3_4.alist \
+    H_n648-z27-r5_6.alist
