@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Demo.qml</file>
+        <file>Graph.ui.qml</file>
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>Logo Peugeot.png</file>
+        <file>arrow.png</file>
+        <file>Settings.ui.qml</file>
+        <file>Screenshot_20180121-164046.png</file>
+    </qresource>
+</RCC>
