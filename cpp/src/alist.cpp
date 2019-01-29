@@ -1,22 +1,31 @@
 #include <iostream>
 #include <map>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <iterator>
+#include <algorithm>
+#include <cstring>
 
 #include "alist.h"
 
 using namespace std;
 
-SimpleMatrix::SimpleMatrix(int n, int m, int *mat)
+SimpleMatrix::SimpleMatrix(int m, int n, double *mat)
 {
     N = n;
     M = m;
+    matrix = mat;
+    matrix_delete = false;
+}
 
-    if (mat != NULL) {
-        matrix = mat;
-        matrix_delete = false;
-    } else {
-        matrix = new int[n*m];
-        matrix_delete = true;
-    }
+SimpleMatrix::SimpleMatrix(int m, int n)
+{
+    N = n;
+    M = m;
+    matrix = new double[n*m];
+    matrix_delete = true;
 }
 
 SimpleMatrix::~SimpleMatrix()
@@ -36,8 +45,13 @@ void SimpleMatrix::print()
     for (r=0; r<M; r++) {
         for (c=0; c<N; c++) {
             //cout << "(" << r*(sm->N)+c << ")" << sm->matrix[r*(sm->N)+c] << " ";
-            cout << "idx: " << r*N+c << " ";
-            cout << matrix[r*N+c] << " ";
+            //cout << matrix[r*N+c] << " ";
+            double val = matrix[r*N+c];
+            if (val < 0) {
+                printf("%1.2f ", val);
+            } else {
+                printf(" %1.2f ", val);
+            }
         }
         cout << endl;
     }
@@ -46,6 +60,40 @@ void SimpleMatrix::print()
 /////////
 /////////
 /////////
+
+AlistMatrix::AlistMatrix(int m, int n, int biggest_m, int biggest_n)
+{
+    M = m;
+    N = n;
+
+    biggest_num_m = biggest_m;
+    biggest_num_n = biggest_n;
+
+    // Biggest number of entries n and m
+    num_nlist = new int[N];
+    num_mlist = new int[M];
+
+    // Assume that all have the same number of entries
+    for (int i=0; i<N; i++) {
+        num_nlist[i] = biggest_num_n;
+    }
+    for (int i=0; i<M; i++) {
+        num_mlist[i] = biggest_num_m;
+    }
+
+    // Actual storage of the values, nodes hold pointers
+    alloc_values();
+
+    // Build N and M lists
+    nlist = new alist_entry*[N];
+    for (int i=0; i<N; i++) {
+        nlist[i] = new alist_entry[biggest_num_n];
+    }
+    mlist = new alist_entry*[M];
+    for (int i=0; i<M; i++) {
+        mlist[i] = new alist_entry[biggest_num_m];
+    }
+}
 
 AlistMatrix::AlistMatrix(AlistMatrix &clone)
 {
@@ -59,7 +107,7 @@ AlistMatrix::AlistMatrix(AlistMatrix &clone)
     num_nlist = new int[N];
     num_mlist = new int[M];
 
-    values = new alistval_t[biggest_num_n * biggest_num_m];
+    alloc_values();
 
     // Map the value pointers between the N and M list
     // so that changing a value in the Nlist is reflected in the M list
@@ -104,7 +152,6 @@ AlistMatrix::AlistMatrix(AlistMatrix &clone)
         }
     }
 
-    int cntm = 0;
     // M list
     for (int i=0; i<M; i++) {
         for (int j=0; j<num_mlist[i]; j++) {
@@ -113,6 +160,241 @@ AlistMatrix::AlistMatrix(AlistMatrix &clone)
             mlist[i][j].value = tmp_ptr_map[clone.mlist[i][j].value];
         }
     }
+}
+
+// Parse alist text file
+/*
+N
+M
+Biggest num N
+Biggest num M
+Num N list (N times)
+Num M list (M times)
+N list [16][Num_N_List[i]]
+M list [M][Num_M_List[i]]
+*/
+AlistMatrix::AlistMatrix(string alist_file)
+{
+    enum AlistDecodeState {
+        N,
+        M,
+        BIGGEST_N,
+        BIGGEST_M,
+        NUM_N_LIST,
+        NUM_M_LIST,
+        N_LIST,
+        M_LIST,
+        DONE,
+        ERROR
+    };
+
+    enum AlistDecodeState alist_decode_state = AlistDecodeState::N;
+    int nlist_cnt = 0;
+    int mlist_cnt = 0;
+
+    string line;
+    ifstream myfile (alist_file);
+    if (myfile.is_open()) {
+        while (getline(myfile,line)) {
+            //cout << line << '\n';
+
+            if (alist_decode_state == AlistDecodeState::N) {
+                this->N = stoi(line);
+                alist_decode_state = AlistDecodeState::M;
+            }
+
+            else if (alist_decode_state == AlistDecodeState::M) {
+                this->M = stoi(line);
+                alist_decode_state = AlistDecodeState::BIGGEST_N;
+            }
+
+            else if (alist_decode_state == AlistDecodeState::BIGGEST_N) {
+                biggest_num_n = stoi(line);
+                alist_decode_state = AlistDecodeState::BIGGEST_M;
+            }
+
+            else if (alist_decode_state == AlistDecodeState::BIGGEST_M) {
+                biggest_num_m = stoi(line);
+                alist_decode_state = AlistDecodeState::NUM_N_LIST;
+            }
+
+            else if (alist_decode_state == AlistDecodeState::NUM_N_LIST) {
+                this->num_nlist = new int[this->N];
+
+                /* Split the string into number tokens */
+                istringstream buf(line);
+                istream_iterator<string> beg(buf), end;
+                vector<string> tokens(beg, end); // done!
+
+                for (int i=0; i<this->N; i++) {
+                    num_nlist[i] = stoi(tokens[i]);
+                }
+
+                /* Build nlist */
+                nlist = new alist_entry*[this->N];
+                for (int i=0; i<this->N; i++) {
+                    nlist[i] = new alist_entry[num_nlist[i]];
+                }
+
+                alist_decode_state = AlistDecodeState::NUM_M_LIST;
+            }
+
+            else if (alist_decode_state == AlistDecodeState::NUM_M_LIST) {
+                this->num_mlist = new int[this->M];
+
+                /* Split the string into number tokens */
+                istringstream buf(line);
+                istream_iterator<string> beg(buf), end;
+                vector<string> tokens(beg, end); // done!
+
+                for (int i=0; i<this->M; i++) {
+                    num_mlist[i] = stoi(tokens[i]);
+                }
+
+                /* Build mlist */
+                mlist = new alist_entry*[this->M];
+                for (int i=0; i<this->M; i++) {
+                    mlist[i] = new alist_entry[num_mlist[i]];
+                }
+
+                alist_decode_state = AlistDecodeState::N_LIST;
+            }
+
+            else if (alist_decode_state == AlistDecodeState::N_LIST) {
+                /* Fill the N list */
+
+                /* Split the string into number tokens */
+                istringstream buf(line);
+                istream_iterator<string> beg(buf), end;
+                vector<string> tokens(beg, end); // done!
+
+                for (int i=0; i<num_nlist[nlist_cnt]; i++) {
+                    //cout << "nlist_cnt: " << nlist_cnt << " i: " << i << " token" << stoi(tokens.at(i)) << endl;
+                    nlist[nlist_cnt][i].idx = stoi(tokens[i]);
+                }
+
+                if (++nlist_cnt == this->N) {
+                    alist_decode_state = AlistDecodeState::M_LIST;
+                }
+
+            }
+
+            else if (alist_decode_state == AlistDecodeState::M_LIST) {
+                /* Fill the M list */
+
+                /* Split the string into number tokens */
+                istringstream buf(line);
+                istream_iterator<string> beg(buf), end;
+                vector<string> tokens(beg, end); // done!
+
+                for (int i=0; i<num_mlist[mlist_cnt]; i++) {
+                    //cout << "mlist_cnt: " << mlist_cnt << " i: " << i << " token" << stoi(tokens.at(i)) << endl;
+                    mlist[mlist_cnt][i].idx = stoi(tokens[i]);
+                }
+
+                if (++mlist_cnt == this->M) {
+                    alist_decode_state = AlistDecodeState::DONE;
+                }
+            }
+
+            else if (alist_decode_state == AlistDecodeState::DONE) {
+                break;
+            }
+
+            else if (alist_decode_state == AlistDecodeState::ERROR) {
+                cout << "Error\n";
+                break;
+            }
+            else {
+                cout << "Unknown state\n";
+                break;
+            }
+
+        }
+
+        if (alist_decode_state != AlistDecodeState::DONE) {
+            cout << "Alist file not complete!" << endl;
+            alist_decode_state = AlistDecodeState::ERROR;
+        }
+
+        /* Allocate space for values (has none) */
+        alloc_values();
+        map_nm();
+
+        /* Map the value pointers to the nlist and mlist */
+
+        /* Close the file */
+        myfile.close();
+    }
+
+    else cout << "Unable to open file";
+
+#if 0
+    N = sm->getN();
+    M = sm->getM();
+
+    // Biggest number of entries n and m
+    num_nlist = new int[N];
+    num_mlist = new int[M];
+
+    simple_matrix_biggest_nm(sm);
+
+    // Actual storage of the values, nodes hold pointers
+    alloc_values();
+
+    // Build N and M lists
+    nlist = new alist_entry*[N];
+    for (int i=0; i<N; i++) {
+        nlist[i] = new alist_entry[num_nlist[i]];
+    }
+    mlist = new alist_entry*[M];
+    for (int i=0; i<M; i++) {
+        mlist[i] = new alist_entry[num_mlist[i]];
+    }
+
+    simple_matrix_nm_list(sm);
+
+    return;
+#endif
+}
+
+/*
+ * Map the pointers in numn to numm so that changing a value at one of the
+ * two changes it in both representations
+ */
+void AlistMatrix::map_nm(void)
+{
+    /*
+     * N to M map is:
+     *  idx = row, column is the number of times the index appeared
+     */
+    int *idx_cnt = new int[M];
+    if (!idx_cnt) {
+        cout << "Malloc error";
+        exit(-1);
+    }
+    fill(idx_cnt, idx_cnt+M, 0); // Start all at 0
+
+    // Map the values to N
+    int value_cnt = 0;
+    for (int i=0; i<N; i++) {
+        for (int j=0; j<num_nlist[i]; j++) {
+            nlist[i][j].value = &values[value_cnt];
+            *nlist[i][j].value = value_cnt;
+
+            /* Translate to mlist index */
+            int m_i = nlist[i][j].idx-1; // row
+            int m_j = idx_cnt[m_i]++; // column
+
+            //cout << "nlist [" << i << "," << j << "] idx: " << nlist[i][j].idx << " -> mlist[" << m_i << "," << m_j << "]" << endl;
+
+            mlist[m_i][m_j].value = &values[value_cnt];
+
+            ++value_cnt;
+        }
+    }
+
+    delete [] idx_cnt;
 }
 
 void AlistMatrix::clear()
@@ -145,7 +427,7 @@ void AlistMatrix::simple_matrix_biggest_nm(SimpleMatrix *sm)
 
     int n = sm->getN();
     int m = sm->getM();
-    int *matrix = sm->getMatrix();
+    double *matrix = sm->getMatrix();
 
     biggest_num_n = 0;
     biggest_num_m = 0;
@@ -198,7 +480,7 @@ void AlistMatrix::simple_matrix_nm_list(SimpleMatrix *sm)
     int m = sm->getM();
 
     int ncnt = 0, mcnt = 0;
-    int *matrix = sm->getMatrix();
+    double *matrix = sm->getMatrix();
 
     // Map the value pointers between the N and M list
     // so that changing a value in the Nlist is reflected in the M list
@@ -210,7 +492,7 @@ void AlistMatrix::simple_matrix_nm_list(SimpleMatrix *sm)
     for (c=0; c<n; c++) {
         for (r=0; r<m; r++) {
             int idx = IDX_MAT_ARRAY(c,r,n);
-            int val = matrix[idx];
+            alistval_t val = matrix[idx];
             //cout << r+ m*c << "|";
             if (val != 0) {
                 nlist[c][ncnt].idx = r+1;
@@ -233,7 +515,7 @@ void AlistMatrix::simple_matrix_nm_list(SimpleMatrix *sm)
     for (r=0; r<m; r++) {
         for (c=0; c<n; c++) {
             int idx = IDX_MAT_ARRAY(c,r,n);
-            int val = matrix[idx];
+            alistval_t val = matrix[idx];
             //cout << c*m+ r << "|";
             if (val != 0) {
                 mlist[r][mcnt].idx = c+1;
@@ -254,8 +536,6 @@ void AlistMatrix::simple2alist(SimpleMatrix *sm)
     N = sm->getN();
     M = sm->getM();
 
-    int *matrix = sm->getMatrix();
-
     // Biggest number of entries n and m
     num_nlist = new int[N];
     num_mlist = new int[M];
@@ -263,8 +543,7 @@ void AlistMatrix::simple2alist(SimpleMatrix *sm)
     simple_matrix_biggest_nm(sm);
 
     // Actual storage of the values, nodes hold pointers
-    values = new alistval_t[biggest_num_n * biggest_num_m];
-
+    alloc_values();
 
     // Build N and M lists
     nlist = new alist_entry*[N];
@@ -279,6 +558,55 @@ void AlistMatrix::simple2alist(SimpleMatrix *sm)
     simple_matrix_nm_list(sm);
 
     return;
+}
+
+
+// Alist to Simple Matrix using the M list (meant for testing)
+SimpleMatrix * AlistMatrix::alist2simple_M(void)
+{
+    SimpleMatrix *sm = new SimpleMatrix(N, M);
+    double *mat = sm->getMatrix();
+
+    int r, c;
+
+    for (r=0; r<M; r++) {
+        //cout << "Entries: " << entries << endl;
+        int entry = 0;
+        for (c=0; c<N; c++) {
+            int idx = r*N+c;
+
+            //cout << "Read mlist r=" << r << " entry=" << entry << " idx=" << idx << endl;
+            if (entry < num_mlist[r] && mlist[r][entry].idx-1 == c) {
+                //cout << "Entry found: " << entry << endl;
+                mat[idx] = *mlist[r][entry].value;
+                ++entry;
+            } else {
+                mat[idx] = 0;
+            }
+        }
+        //cout << endl;
+    }
+
+#if 0
+    cout << "M list: " << endl;
+    for (int i=0; i<M; i++) {
+        for (int j=0; j<num_mlist[i]; j++) {
+            //cout << al->mlist[i][j].idx << ",";
+            cout << mlist[i][j].idx << "(" << *mlist[i][j].value << "),";
+        }
+        cout << endl;
+    }
+    cout << endl;
+#endif
+
+    return sm;
+
+}
+
+// Alist to Simple Matrix using the N list (meant for testing)
+SimpleMatrix * AlistMatrix::alist2simple_N(void)
+{
+    return NULL;
 }
 
 
