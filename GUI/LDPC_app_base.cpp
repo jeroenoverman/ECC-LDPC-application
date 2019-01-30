@@ -280,6 +280,9 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
                 }
             }
         }
+        if (bf_niter == 0) {
+            bf_niter = bp_iter;
+        }
 
 
         int *decoded_msg_bf = bf.result();
@@ -311,6 +314,9 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
                     delete [] decoded_msg_iter;
                 }
             }
+        }
+        if (bp_niter == 0) {
+            bp_niter = bp_iter;
         }
 
         encoded_msg_bpsk_received = bp.getResult(&msg_size);

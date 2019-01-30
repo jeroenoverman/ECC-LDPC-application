@@ -11,5 +11,9 @@
         <file>Screenshot_20180121-164046.png</file>
         <file>trump.png</file>
         <file>test1.png</file>
+        <file>Iterations.qml</file>
+        <file>Info.qml</file>
+        <file>checkerbox.png</file>
+        <file>dog.jpg</file>
     </qresource>
 </RCC>

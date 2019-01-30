@@ -6,20 +6,31 @@ ApplicationWindow {
     visible: true
     width: 1024
     height: 768
-    title: qsTr("Tabs")
+    title: qsTr("LDPC Demo")
+    font.pointSize: 12
 
     SwipeView {
         id: swipeView
         anchors.fill: parent
         currentIndex: tabBar.currentIndex
 
+        signal page_changed(var number)
+
 
         Settings {
 
             Component.onCompleted:  {
+                dataSource.set_image_parameters(image_select.model.get(image_select.currentIndex).value)
                 dataSource.set_AWGN_parameters(snr_demo.value)
-                dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value)
+                dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
                 dataSource.set_graph_parameters(avg_iter.value, snr_range.first.value, snr_range.second.value, step_size.value)
+            }
+
+            image_select {
+                onCurrentIndexChanged: {
+                    dataSource.set_image_parameters(image_select.model.get(image_select.currentIndex).value)
+                    preview_image.source = image_select.model.get(image_select.currentIndex).value
+                }
             }
 
             toolTip_snr_demo{
@@ -42,12 +53,33 @@ ApplicationWindow {
             }
             decode_iter {
                 onValueChanged: {
-                    dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value)
+                    dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
                 }
             }
             h_matrix{
                 onCurrentIndexChanged: {
-                    dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value)
+                    dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
+                }
+            }
+
+            iter0{
+                onValueChanged: {
+                    dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
+                }
+            }
+            iter1{
+                onValueChanged: {
+                    dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
+                }
+            }
+            iter2{
+                onValueChanged: {
+                    dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
+                }
+            }
+            iter3{
+                onValueChanged: {
+                    dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
                 }
             }
 
@@ -100,14 +132,30 @@ ApplicationWindow {
         }
 
         Demo {
+            id: demo_page
 
 
+            Component.onCompleted: {
+//                dataSource.calculateDemo()
+            }
 
+        }
+
+        Iterations {
 
         }
 
         Graph {
+            Component.onCompleted: {
+//                dataSource.calculateGraph()
+            }
+
         }
+        Info{
+
+        }
+
+        onCurrentIndexChanged: swipeView.page_changed(swipeView.currentIndex)
     }
 
 
@@ -122,14 +170,18 @@ ApplicationWindow {
         }
 
         TabButton {
+            id: demo_button
             text: qsTr("Demo")
-            onClicked: {
-                dataSource.calculateDemo()
-            }
+
+        }
+        TabButton {
+            text: qsTr("Iterations")
         }
         TabButton {
             text: qsTr("BER vs. SNR")
-            onClicked: dataSource.calculateGraph()
+        }
+        TabButton {
+            text: qsTr("Info")
         }
     }
 }
