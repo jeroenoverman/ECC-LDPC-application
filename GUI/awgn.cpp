@@ -4,6 +4,7 @@
 #include <iterator>
 #include <random>
 #include <complex>
+#include <time.h>
 
 #include "awgn.h"
 
