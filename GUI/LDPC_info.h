@@ -33,6 +33,8 @@ typedef struct iter_entry {
     int iteration;
     int *data_out_bf;
     int *data_out_bp;
+    double ber_avg_bf;
+    double ber_avg_bp;
 } iter_entry_t;
 
 class LDPC_info {

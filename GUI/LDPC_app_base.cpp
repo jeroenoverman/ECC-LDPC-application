@@ -277,6 +277,7 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
             for (iter_entry_t &ie : iter_data_out) {
                 if (ie.iteration == i+1) {
                     memcpy(&ie.data_out_bf[idx], bf.result(), size_bytes);
+                    ie.ber_avg_bf += BPSK::ber(data_buffer, bf.result(), info_size);
                 }
             }
         }
@@ -311,6 +312,7 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
                     int *decoded_msg_iter = new int[info_size];
                     BPSK::decode(decoded_msg_iter, bp.getResult(), info_size);
                     memcpy(&ie.data_out_bp[idx], decoded_msg_iter, size_bytes);
+                    ie.ber_avg_bp += BPSK::ber(data_buffer, decoded_msg_iter, info_size);
                     delete [] decoded_msg_iter;
                 }
             }
@@ -358,6 +360,12 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
 
     bf_iter_total = bf_iter_total/blocks;
     bp_iter_total = bp_iter_total/blocks;
+
+    /* Compute avg ber for the iteration images */
+    for (iter_entry_t &ie : iter_data_out) {
+        ie.ber_avg_bf = ie.ber_avg_bf/blocks;
+        ie.ber_avg_bp = ie.ber_avg_bp/blocks;
+    }
 
     /* Add an entry for the SNR */
     BER_entry_t be;
