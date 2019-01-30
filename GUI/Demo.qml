@@ -124,8 +124,16 @@ Page {
                 antialiasing: true
                 legend.visible: false
                 //Legend.visible: false
+                ValueAxis {
+                    min: 0
+                    max: 1
+                    id: y_axis
+                    titleText: "BER"
+                }
+
                 BarSeries {
                     id: biterrorrate
+                    axisY: y_axis
                     axisX: BarCategoryAxis {
                         categories: ["No ECC", "LDPC - bitflipping", "LDPC - likelihood"]
                     }
@@ -164,7 +172,7 @@ Page {
         target: dataSource
         onSend_demo_data: {
             console.log("Received bar set from c++")
-            dataSource.updateDemoGraph(chartView.series(0));
+            dataSource.updateDemoGraph(chartView.series(0), chartView.axisY(chartView.series(0)));
             original_image.source = "";
             original_image.source = "image://ecc_source/original";
             image_without.source = "";

@@ -36,7 +36,7 @@ DataSource::DataSource(QObject *parent) :
 
 }
 
-void DataSource::updateDemoGraph(QAbstractBarSeries *series)
+void DataSource::updateDemoGraph(QAbstractBarSeries *series, QAbstractAxis* y_axis)
 {
     if(series) {
         QBarSeries *barseries = static_cast<QBarSeries *>(series);
@@ -47,6 +47,10 @@ void DataSource::updateDemoGraph(QAbstractBarSeries *series)
         temp->append(ber_belief);
         barseries->append(temp);
 
+    }
+    if(y_axis)
+    {
+        y_axis->setMax(max_ber_demo);
     }
 
 }
@@ -118,7 +122,7 @@ void DataSource::calculateDemo()
 {
     LDPC_app_base ab;
 
-    std::vector<std::string> files = {"H_n648-z27-r1_2.alist"};
+    std::vector<std::string> files = {"H_n648-z27-r1_2.alist","H_n648-z27-r2_3.alist","H_n648-z27-r3_4.alist","H_n648-z27-r5_6.alist"};
     ab.add_alist_files(files);
     LDPC_info ldpc_info;
 
@@ -149,12 +153,19 @@ void DataSource::calculateDemo()
     /* Apply and reconstruct */
     ab.run_data_app(ldpc_info,
             data_out_bp, data_out_bf, data_out_raw, (int *)stream,
-            size, snr, max_it, ab.getMatrix("H_n648-z27-r1_2.alist"));
+            size, snr, max_it, ab.getMatrix(/*"H_n648-z27-r1_2.alist"*/matrix.toStdString()));
 
 //    ldpc_info.print();
+    max_ber_demo = 0;
     ber_none = ldpc_info.get_entry(snr).BER_no_ecc;
+    if (ber_none > max_ber_demo)
+        max_ber_demo = ber_none;
     ber_bitflip = ldpc_info.get_entry(snr).BER_bf;
+    if (ber_bitflip > max_ber_demo)
+        max_ber_demo = ber_bitflip;
     ber_belief = ldpc_info.get_entry(snr).BER;
+    if(ber_belief > max_ber_demo)
+        max_ber_demo = ber_belief;
 
     image_no_ecc = bits_to_image((unsigned int *)data_out_raw);
     image_bitflip = bits_to_image((unsigned int *)data_out_bf);
@@ -172,7 +183,7 @@ void DataSource::calculateGraph()
 {
 
     LDPC_app_base ab;
-    std::vector<std::string> files = {"H_n648-z27-r1_2.alist", "H_n648-z27-r5_6.alist"};
+    std::vector<std::string> files = {"H_n648-z27-r1_2.alist","H_n648-z27-r2_3.alist","H_n648-z27-r3_4.alist","H_n648-z27-r5_6.alist"};
     ab.add_alist_files(files);
 
     std::vector<double> SNRdb_list;//{-5, -4, -3, -2, -1, -0.5, 0, 0.5, 1, 2, 3, 4, 5, 7, 10, 11, 12, 14, 16};
@@ -184,7 +195,7 @@ void DataSource::calculateGraph()
 
     // 5 runs per SNR, 8 iterations per belief prop decoding
     LDPC_info ldpc_info_r1_2;
-    ab.run_bersim_app(ldpc_info_r1_2, SNRdb_list, num_runs, max_it, ab.getMatrix("H_n648-z27-r1_2.alist"));
+    ab.run_bersim_app(ldpc_info_r1_2, SNRdb_list, num_runs, max_it, ab.getMatrix(matrix.toStdString()));
 //    ldpc_info_r1_2.print();
 
     ber_none_series.clear();
@@ -242,7 +253,9 @@ QImage DataSource::bits_to_image(unsigned int *bitstream)
             for (int b=0; b<32; b++) {
                 bits |= (bitstream[stream_cnt++] & 1) << b;
             }
+            bits |= 0xffU << 24;
             QRgb pixel = (QRgb)bits;
+
             new_image.setPixel(x,y, pixel);
         }
     }

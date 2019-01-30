@@ -280,7 +280,7 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
         /* Copy decoded bits to the output */
         memcpy(&data_out_bp[idx], decoded_msg, size_bytes); // Belief Prop
         memcpy(&data_out_bf[idx], decoded_msg_bf, size_bytes); // Bit Flip
-        memcpy(&data_out_bf[idx], decoded_msg_no_bp, size_bytes); // Raw
+        memcpy(&data_out_raw[idx], decoded_msg_no_bp, size_bytes); // Raw
 
         /* Next block */
         data_ptr = &data_ptr[info_size];

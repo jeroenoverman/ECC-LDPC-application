@@ -20,7 +20,7 @@ public:
 Q_SIGNALS:
 
 public slots:
-    void updateDemoGraph(QAbstractBarSeries *series);
+    void updateDemoGraph(QAbstractBarSeries *series, QAbstractAxis* y_axis);
     void updateSNRAxis(QAbstractAxis * x_axis, QAbstractAxis* y_axis);
     void updateSNRGraph(QAbstractSeries *series, int type);
     void set_AWGN_parameters(float snr);
@@ -53,6 +53,7 @@ private:
 
     //demo data
     float ber_none, ber_bitflip, ber_belief;
+    float max_ber_demo;
 public:
     QImage image;
     QImage image_no_ecc;

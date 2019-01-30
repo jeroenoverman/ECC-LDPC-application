@@ -102,19 +102,19 @@ Page {
                     model: ListModel {
                         ListElement {
                             key: "1/2"
-                            value: 123
+                            value: "H_n648-z27-r1_2.alist"
                         }
                         ListElement {
                             key: "2/3"
-                            value: 456
+                            value: "H_n648-z27-r2_3.alist"
                         }
                         ListElement {
                             key: "3/4"
-                            value: 789
+                            value: "H_n648-z27-r3_4.alist"
                         }
                         ListElement {
                             key: "5/6"
-                            value: 1024
+                            value: "H_n648-z27-r5_6.alist"
                         }
                     }
                 }
