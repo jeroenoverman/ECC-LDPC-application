@@ -9,8 +9,6 @@
         <file>arrow.png</file>
         <file>Settings.ui.qml</file>
         <file>Screenshot_20180121-164046.png</file>
-        <file>../build-LDPC-Desktop_Qt_5_12_0_MinGW_64_bit-Debug/p_thumb-32x32.png</file>
-        <file>../build-LDPC-Desktop_Qt_5_12_0_MinGW_64_bit-Debug/trump.png</file>
         <file>trump.png</file>
         <file>test1.png</file>
     </qresource>
