@@ -5,6 +5,12 @@ import QtQuick.Layouts 1.12
 Page {
     width: 1024
     height: 768
+    property alias iter3: iter3
+    property alias iter2: iter2
+    property alias iter1: iter1
+    property alias iter0: iter0
+    property alias preview_image: preview_image
+    property alias image_select: image_select
     property alias h_matrix: h_matrix
     property alias toolTip_step_size: toolTip_step_size
     property alias step_size: step_size
@@ -25,11 +31,11 @@ Page {
     property alias snr_demo: snr_demo
     property int margin: 10
 
-    header: Label {
-        text: qsTr("Settings")
-        font.pixelSize: Qt.application.font.pixelSize * 2
-        padding: 10
-    }
+//    header: Label {
+//        text: qsTr("Settings")
+//        font.pixelSize: Qt.application.font.pixelSize * 2
+//        padding: 10
+//    }
 
     ColumnLayout {
         id: main_column
@@ -40,6 +46,51 @@ Page {
         anchors.left: parent.left
         anchors.margins: margin
         spacing: 10
+
+        GroupBox {
+            id: demo_image
+            title: "Demo image"
+            Layout.fillWidth: true
+            ColumnLayout {
+                anchors.fill: parent
+
+                RowLayout {
+//                    anchors.fill: parent
+                    ComboBox {
+                        id: image_select
+                        textRole: "key"
+                        Layout.fillWidth: true
+                        model: ListModel {
+                            ListElement {
+                                key: "Test image 1"
+                                value: "test1.png"
+                            }
+                            ListElement {
+                                key: "Colored checkerbox"
+                                value: "checkerbox.png"
+                            }
+                            ListElement {
+                                key: "trump"
+                                value: "trump.png"
+                            }
+                            ListElement {
+                                key: "dog"
+                                value: "dog.jpg"
+                            }
+                        }
+                    }
+                    Image {
+                        id: preview_image
+                        height: image_select.height
+//                        width: 100
+                        antialiasing: true
+                        fillMode: Image.PreserveAspectFit
+                        source: ""
+                        cache: false
+                    }
+                }
+            }
+        }
 
         GroupBox {
             id: awgn_channel
@@ -119,31 +170,66 @@ Page {
                     }
                 }
 
-                ColumnLayout {
-                    RowLayout {
-                        Label {
-                            id: label_max_iterations
-                            text: qsTr("Max iterations decoder: ")
-                        }
-                        Label {
-                            id: value_label_max_iterations
-                        }
+                //                ColumnLayout {
+                RowLayout {
+                    Label {
+                        id: label_max_iterations
+                        text: qsTr("Max iterations decoder: ")
                     }
-                    Slider {
-                        id: decode_iter
-                        stepSize: 1
-                        from: 1
-                        value: 8
-                        to: 20
+                    Label {
+                        id: value_label_max_iterations
+                    }
+                }
 
-                        //                        topPadding: 35
+                Slider {
+                    id: decode_iter
+                    stepSize: 1
+                    from: 1
+                    value: 8
+                    to: 20
+
+                    //                        topPadding: 35
+                    Layout.fillWidth: true
+                    ToolTip {
+                        id: toolTip_decode_iter
+                        parent: decode_iter.handle
+                        visible: decode_iter.pressed
+                        text: "test"
+                    }
+                }
+                Label {
+                    id: label_intermediate_iter
+                    text: qsTr("Intermediate iterations")
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    SpinBox {
+                        id: iter0
+                        from: 0
+                        to: decode_iter.value
+                        value: 1
                         Layout.fillWidth: true
-                        ToolTip {
-                            id: toolTip_decode_iter
-                            parent: decode_iter.handle
-                            visible: decode_iter.pressed
-                            text: "test"
-                        }
+                    }
+                    SpinBox {
+                        id: iter1
+                        from: 0
+                        to: decode_iter.value
+                        value: 2
+                        Layout.fillWidth: true
+                    }
+                    SpinBox {
+                        id: iter2
+                        from: 0
+                        to: decode_iter.value
+                        value: 3
+                        Layout.fillWidth: true
+                    }
+                    SpinBox {
+                        id: iter3
+                        from: 0
+                        to: decode_iter.value
+                        value: 4
+                        Layout.fillWidth: true
                     }
                 }
             }

@@ -27,13 +27,9 @@ DataSource::DataSource(QObject *parent) :
     qRegisterMetaType<QAbstractAxis*>();
 //    qRegisterMetaType<QAbstractBarSeries*>();
 
-    QString rsrcid = ":/test1.png"; //+ id;
-    image.load(rsrcid);
-//    unsigned int * stream;
-//    stream = image_to_bits(image);
-//    image_no_ecc = bits_to_image(stream);
-//    delete [] stream;
 
+    settings_changed_demo = true;
+    settings_changed_graph = true;
 }
 
 void DataSource::updateDemoGraph(QAbstractBarSeries *series, QAbstractAxis* y_axis)
@@ -50,7 +46,7 @@ void DataSource::updateDemoGraph(QAbstractBarSeries *series, QAbstractAxis* y_ax
     }
     if(y_axis)
     {
-        y_axis->setMax(max_ber_demo);
+        y_axis->setMax(1.2*max_ber_demo);
     }
 
 }
@@ -93,20 +89,38 @@ void DataSource::updateSNRGraph(QAbstractSeries *series, int type)
     }
 }
 
+void DataSource::set_image_parameters(QString image)
+{
+    QString rsrcid = ":/" + image; //+ id;
+    this->image.load(rsrcid);
+    settings_changed_demo = true;
+    settings_changed_graph = true;
+}
+
 void DataSource::set_AWGN_parameters(float snr)
 {
 
     qInfo() << "New snr set: " << snr;
     this->snr = snr;
+    settings_changed_demo = true;
+    settings_changed_graph = true;
 
 
 }
 
-void DataSource::set_LDPC_parameters(QString matrix, int max_it)
+void DataSource::set_LDPC_parameters(QString matrix, int max_it, int inter_it0, int inter_it1, int inter_it2, int inter_it3)
 {
     qInfo() << "New LDPC parameters set "<< matrix << " and " << max_it;
     this->matrix = matrix;
     this->max_it = max_it;
+    this->inter_it0 = inter_it0;
+    this->inter_it1 = inter_it1;
+    this->inter_it2 = inter_it2;
+    this->inter_it3 = inter_it3;
+
+
+    settings_changed_demo = true;
+    settings_changed_graph = true;
 }
 
 void DataSource::set_graph_parameters(int num_runs, float snr_low, float snr_high, float step_size)
@@ -116,107 +130,121 @@ void DataSource::set_graph_parameters(int num_runs, float snr_low, float snr_hig
     this->snr_low = snr_low;
     this->snr_high = snr_high;
     this->snr_step = step_size;
+    settings_changed_demo = true;
+    settings_changed_graph = true;
 }
 
 void DataSource::calculateDemo()
 {
-    LDPC_app_base ab;
+    if (settings_changed_demo) {
+        LDPC_app_base ab;
 
-    std::vector<std::string> files = {"H_n648-z27-r1_2.alist","H_n648-z27-r2_3.alist","H_n648-z27-r3_4.alist","H_n648-z27-r5_6.alist"};
-    ab.add_alist_files(files);
-    LDPC_info ldpc_info;
+        std::vector<std::string> files = {"H_n648-z27-r1_2.alist","H_n648-z27-r2_3.alist","H_n648-z27-r3_4.alist","H_n648-z27-r5_6.alist"};
+        ab.add_alist_files(files);
+        LDPC_info ldpc_info;
 
 #if 0
-    /* Random data instead of image of 2 blocks + 42 in size */
-    int size = 324*2+42;
-    int *r_bin_signal = new int[size];
+        /* Random data instead of image of 2 blocks + 42 in size */
+        int size = 324*2+42;
+        int *r_bin_signal = new int[size];
 
-    /* Generate random binary signal of 1 block (K size) */
-    auto myrand = std::bind(std::uniform_int_distribution<int>{0, 1},
-            std::mt19937(std::random_device{}()));
+        /* Generate random binary signal of 1 block (K size) */
+        auto myrand = std::bind(std::uniform_int_distribution<int>{0, 1},
+                std::mt19937(std::random_device{}()));
 
-    for (int i=0; i<size; i++) {
-        r_bin_signal[i] = myrand();
-    }
+        for (int i=0; i<size; i++) {
+            r_bin_signal[i] = myrand();
+        }
 #endif
 
-    unsigned int * stream;
-    stream = image_to_bits(image);
-    int size = image_width * image_height * 32;
-    qDebug() << "stream size   " << size;
+        unsigned int * stream;
+        stream = image_to_bits(image);
+        int size = image_width * image_height * 32;
+        qDebug() << "stream size   " << size;
 
-    /* Return data */
-    int *data_out_bp = new int[size];
-    int *data_out_bf = new int[size];
-    int *data_out_raw = new int[size];
+        /* Return data */
+        int *data_out_bp = new int[size];
+        int *data_out_bf = new int[size];
+        int *data_out_raw = new int[size];
 
-    /* Apply and reconstruct */
-    ab.run_data_app(ldpc_info,
-            data_out_bp, data_out_bf, data_out_raw, (int *)stream,
-            size, snr, max_it, ab.getMatrix(/*"H_n648-z27-r1_2.alist"*/matrix.toStdString()));
+        /* Apply and reconstruct */
+        ab.run_data_app(ldpc_info,
+                data_out_bp, data_out_bf, data_out_raw, (int *)stream,
+                size, snr, max_it, ab.getMatrix(/*"H_n648-z27-r1_2.alist"*/matrix.toStdString()));
 
-//    ldpc_info.print();
-    max_ber_demo = 0;
-    ber_none = ldpc_info.get_entry(snr).BER_no_ecc;
-    if (ber_none > max_ber_demo)
-        max_ber_demo = ber_none;
-    ber_bitflip = ldpc_info.get_entry(snr).BER_bf;
-    if (ber_bitflip > max_ber_demo)
-        max_ber_demo = ber_bitflip;
-    ber_belief = ldpc_info.get_entry(snr).BER;
-    if(ber_belief > max_ber_demo)
-        max_ber_demo = ber_belief;
+    //    ldpc_info.print();
+        max_ber_demo = 0;
+        ber_none = ldpc_info.get_entry(snr).BER_no_ecc;
+        if (ber_none > max_ber_demo)
+            max_ber_demo = ber_none;
+        ber_bitflip = ldpc_info.get_entry(snr).BER_bf;
+        if (ber_bitflip > max_ber_demo)
+            max_ber_demo = ber_bitflip;
+        ber_belief = ldpc_info.get_entry(snr).BER;
+        if(ber_belief > max_ber_demo)
+            max_ber_demo = ber_belief;
 
-    image_no_ecc = bits_to_image((unsigned int *)data_out_raw);
-    image_bitflip = bits_to_image((unsigned int *)data_out_bf);
-    image_belief = bits_to_image((unsigned int *)data_out_bp);
-    qDebug() << "SNR " << snr;
-    delete [] stream;
-    delete [] data_out_bp;
-    delete [] data_out_bf;
-    delete [] data_out_raw;
+        image_no_ecc = bits_to_image((unsigned int *)data_out_raw);
+        image_bitflip = bits_to_image((unsigned int *)data_out_bf);
+        image_belief = bits_to_image((unsigned int *)data_out_bp);
+        qDebug() << "SNR " << snr;
+        delete [] stream;
+        delete [] data_out_bp;
+        delete [] data_out_bf;
+        delete [] data_out_raw;
+        settings_changed_demo = false;
+    }
+
 
     send_demo_data();
 }
 
 void DataSource::calculateGraph()
 {
+    if(settings_changed_graph)
+    {
+        LDPC_app_base ab;
+        std::vector<std::string> files = {"H_n648-z27-r1_2.alist","H_n648-z27-r2_3.alist","H_n648-z27-r3_4.alist","H_n648-z27-r5_6.alist"};
+        ab.add_alist_files(files);
 
-    LDPC_app_base ab;
-    std::vector<std::string> files = {"H_n648-z27-r1_2.alist","H_n648-z27-r2_3.alist","H_n648-z27-r3_4.alist","H_n648-z27-r5_6.alist"};
-    ab.add_alist_files(files);
+        std::vector<double> SNRdb_list;//{-5, -4, -3, -2, -1, -0.5, 0, 0.5, 1, 2, 3, 4, 5, 7, 10, 11, 12, 14, 16};
 
-    std::vector<double> SNRdb_list;//{-5, -4, -3, -2, -1, -0.5, 0, 0.5, 1, 2, 3, 4, 5, 7, 10, 11, 12, 14, 16};
+        for (float i = snr_low; i <= snr_high; i += snr_step) {
 
-    for (float i = snr_low; i <= snr_high; i += snr_step) {
+            SNRdb_list.push_back(i);
+        }
 
-        SNRdb_list.push_back(i);
-    }
+        // 5 runs per SNR, 8 iterations per belief prop decoding
+        LDPC_info ldpc_info_r1_2;
+        ab.run_bersim_app(ldpc_info_r1_2, SNRdb_list, num_runs, max_it, ab.getMatrix(matrix.toStdString()));
+    //    ldpc_info_r1_2.print();
 
-    // 5 runs per SNR, 8 iterations per belief prop decoding
-    LDPC_info ldpc_info_r1_2;
-    ab.run_bersim_app(ldpc_info_r1_2, SNRdb_list, num_runs, max_it, ab.getMatrix(matrix.toStdString()));
-//    ldpc_info_r1_2.print();
+        ber_none_series.clear();
+        ber_bitflip_series.clear();
+        ber_belief_series.clear();
+        max_ber = 0;
+        for (auto snr_v : ldpc_info_r1_2.get_snr_vec()) {
+            ber_none_series.append(QPointF(snr_v,ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc));
+            ber_bitflip_series.append(QPointF(snr_v,ldpc_info_r1_2.get_entry(snr_v).BER_bf));
+            ber_belief_series.append(QPointF(snr_v,ldpc_info_r1_2.get_entry(snr_v).BER));
+            if(ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc > max_ber)
+                max_ber = ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc;
+            if(ldpc_info_r1_2.get_entry(snr_v).BER_bf > max_ber)
+                max_ber = ldpc_info_r1_2.get_entry(snr_v).BER_bf;
+            if(ldpc_info_r1_2.get_entry(snr_v).BER > max_ber)
+                max_ber = ldpc_info_r1_2.get_entry(snr_v).BER;
 
-    ber_none_series.clear();
-    ber_bitflip_series.clear();
-    ber_belief_series.clear();
-    max_ber = 0;
-    for (auto snr_v : ldpc_info_r1_2.get_snr_vec()) {
-        ber_none_series.append(QPointF(snr_v,ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc));
-        ber_bitflip_series.append(QPointF(snr_v,ldpc_info_r1_2.get_entry(snr_v).BER_bf));
-        ber_belief_series.append(QPointF(snr_v,ldpc_info_r1_2.get_entry(snr_v).BER));
-        if(ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc > max_ber)
-            max_ber = ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc;
-        if(ldpc_info_r1_2.get_entry(snr_v).BER_bf > max_ber)
-            max_ber = ldpc_info_r1_2.get_entry(snr_v).BER_bf;
-        if(ldpc_info_r1_2.get_entry(snr_v).BER > max_ber)
-            max_ber = ldpc_info_r1_2.get_entry(snr_v).BER;
+        }
 
+        settings_changed_graph = false;
     }
 
     send_graph_data();
 }
+
+
+
+
 
 unsigned int *DataSource::image_to_bits(QImage image)
 {

@@ -64,6 +64,18 @@ QImage ResourceImageProvider::requestImage(const QString& id, QSize* size, const
     if(id == "logli") {
         image = source->image_belief;
     }
+    if(id == "iter0_belief") {
+        image = source->iter0_belief;
+    }
+    if(id == "iter1_belief") {
+        image = source->iter1_belief;
+    }
+    if(id == "iter2_belief") {
+        image = source->iter2_belief;
+    }
+    if(id == "iter3_belief") {
+        image = source->iter3_belief;
+    }
 
     if (requestedSize.isValid()) {
         result = image.scaled(requestedSize, Qt::KeepAspectRatio);

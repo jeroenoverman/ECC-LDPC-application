@@ -28,6 +28,8 @@ Page {
             min: 0
             max: 1.0
             titleText: "BER"
+            titleFont: Qt.font({pointSize: 16})
+            labelsFont: Qt.font({pointSize: 16})
 //            tickCount: 5
             //reverse: true;
         }
@@ -36,6 +38,8 @@ Page {
             min: -4
             max: 10
             titleText: "SNR"
+            titleFont: Qt.font({pointSize: 16})
+            labelsFont: Qt.font({pointSize: 16})
         }
 
         //Legend.visible: false
@@ -69,6 +73,7 @@ Page {
 //            XYPoint { x: 3.4; y: 500000.0 }
 //            XYPoint { x: 4.1; y: 6000000.3 }
         }
+        legend.font: Qt.font({pointSize: 16})
 
     }
     Connections {
@@ -80,6 +85,17 @@ Page {
             dataSource.updateSNRGraph(chartView.series(2),2);
             dataSource.updateSNRAxis(chartView.axisX(chartView.series(0)),chartView.axisY(chartView.series(0)))
 
+        }
+    }
+    Connections {
+        target: swipeView
+        onPage_changed: {
+
+            console.log("(graph) page changed: " + number)
+            if (number == 3){
+
+                dataSource.calculateGraph()
+            }
         }
     }
 }
