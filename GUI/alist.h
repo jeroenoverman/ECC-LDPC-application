@@ -47,7 +47,7 @@ class AlistMatrix {
         int *num_nlist; // weight of each column n
         int *num_mlist; // weight of each row m
 
-        AlistMatrix() {};
+        AlistMatrix() {}
         AlistMatrix(int m, int n, int biggest_m, int biggest_n);
         AlistMatrix(AlistMatrix &clone);
         AlistMatrix(std::string alist_file);
@@ -64,8 +64,8 @@ class AlistMatrix {
         //getters
         int getM() {return M;}
         int getN() {return N;}
-        int getK() {return N-M;};
-        double getR() {return (double)getK()/(double)N;};
+        int getK() {return N-M;}
+        double getR() {return (double)getK()/(double)N;}
         int getGF() {return GF;}
         int getBiggestNumM() {return biggest_num_m;}
         int getBiggestNumN() {return biggest_num_n;}

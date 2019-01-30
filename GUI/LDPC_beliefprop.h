@@ -31,9 +31,11 @@ class LDPC_BeliefProp {
 
     void prepare(); // Preperations before first step 1
     void step_1(); // Do step 1
-    void step_2(); // Do step 2
-    void iterate(); // Do a whole iteration
-    void run(int iterations = 0); // Do n itterations (whole decode process)
+    int step_2(); // Do step 2
+    int iterate(); // Do a whole iteration
+    int run(int iterations = 0); // Do n itterations (whole decode process)
+    int check_codeword();
+
 
     void incrIterations() {completed_iterations++;};
 

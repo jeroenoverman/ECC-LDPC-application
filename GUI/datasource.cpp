@@ -27,7 +27,7 @@ DataSource::DataSource(QObject *parent) :
     qRegisterMetaType<QAbstractAxis*>();
 //    qRegisterMetaType<QAbstractBarSeries*>();
 
-    QString rsrcid = ":/test1.png"; //+ id;
+    QString rsrcid = ":/trump.png"; //+ id;
     image.load(rsrcid);
 //    unsigned int * stream;
 //    stream = image_to_bits(image);
@@ -150,9 +150,27 @@ void DataSource::calculateDemo()
     int *data_out_bf = new int[size];
     int *data_out_raw = new int[size];
 
+    /* Iteration image data */
+    std::vector<iter_entry_t> iteration_data(4);
+    iteration_data.at(0).iteration = 1; //TODO
+    iteration_data.at(0).data_out_bf = new int[size];
+    iteration_data.at(0).data_out_bp = new int[size];
+
+    iteration_data.at(1).iteration = 2; //TODO
+    iteration_data.at(1).data_out_bf = new int[size];
+    iteration_data.at(1).data_out_bp = new int[size];
+
+    iteration_data.at(2).iteration = 3; //TODO
+    iteration_data.at(2).data_out_bf = new int[size];
+    iteration_data.at(2).data_out_bp = new int[size];
+
+    iteration_data.at(3).iteration = 4; //TODO
+    iteration_data.at(3).data_out_bf = new int[size];
+    iteration_data.at(3).data_out_bp = new int[size];
+
     /* Apply and reconstruct */
     ab.run_data_app(ldpc_info,
-            data_out_bp, data_out_bf, data_out_raw, (int *)stream,
+            data_out_bp, data_out_bf, data_out_raw, iteration_data, (int *)stream,
             size, snr, max_it, ab.getMatrix(/*"H_n648-z27-r1_2.alist"*/matrix.toStdString()));
 
 //    ldpc_info.print();
@@ -175,6 +193,12 @@ void DataSource::calculateDemo()
     delete [] data_out_bp;
     delete [] data_out_bf;
     delete [] data_out_raw;
+
+    /* Free iteration data */
+    for (auto &itd : iteration_data) {
+        delete [] itd.data_out_bf;
+        delete [] itd.data_out_bp;
+    }
 
     send_demo_data();
 }

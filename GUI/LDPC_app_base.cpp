@@ -1,6 +1,7 @@
 #include <iostream>
 #include <regex>
 #include <cstring>
+#include <time.h>
 
 #include "alist.h"
 #include "bpsk.h"
@@ -102,7 +103,7 @@ void LDPC_app_base::run_bersim_app(LDPC_info &ldpc_info, vector<double> &SNRdb_l
 
     /* Generate random binary signal of 1 block (K size) */
     auto myrand = std::bind(std::uniform_int_distribution<int>{0, 1},
-            std::mt19937(std::random_device{}()));
+            std::mt19937(static_cast<std::mt19937::result_type>(time(nullptr))));
 
     for (int i=0; i<info_size; i++) {
         r_bin_signal[i] = myrand();
@@ -186,7 +187,7 @@ void LDPC_app_base::run_bersim_app(LDPC_info &ldpc_info, vector<double> &SNRdb_l
 }
 
 void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
-        int *data_out_bp, int *data_out_bf, int *data_out_raw, int *data_in,
+        int *data_out_bp, int *data_out_bf, int *data_out_raw, vector<iter_entry_t> &iter_data_out, int *data_in,
         int size, double snr_db, int bp_iter, struct h_matrix *hm) {
 
     if (hm == NULL) {
@@ -211,6 +212,9 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
     double ber_total = 0;
     double ber_bf_total = 0;
     double ber_no_ecc_total = 0;
+
+    double bf_iter_total = 0;
+    double bp_iter_total = 0;
 
     cout << "Blocks: " << blocks << " Rest: " << rest << endl;
 
@@ -256,7 +260,28 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
 
         /* Run LDPC Bit Flipping */
         LDPC_BitFlip bf(&al, decoded_msg_no_bp);
-        bf.run();
+
+        /* Run the Bit Flip iterations */
+        //int bf_niter = bf.run(bp_iter);
+        int bf_niter = 0;
+        bool bf_iter_done = false;
+        for (int i=0; i<bp_iter; i++) {
+            if (!bf_iter_done) {
+                if (bf.iterate() == 0) {
+                    bf_iter_done = true;
+                    bf_niter = i+1;
+                }
+
+            }
+            // Fill iter_data_out
+            for (iter_entry_t &ie : iter_data_out) {
+                if (ie.iteration == i+1) {
+                    memcpy(&ie.data_out_bf[idx], bf.result(), size_bytes);
+                }
+            }
+        }
+
+
         int *decoded_msg_bf = bf.result();
         double ber_bf = BPSK::ber(data_buffer, decoded_msg_bf, info_size);
         //cout << "BF iter: " << bfiter << " BER: " << ber_bf << endl;
@@ -265,7 +290,29 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
         double *encoded_msg_bpsk_received;
         int msg_size;
         LDPC_BeliefProp bp(&al, encoded_msg_bpsk_received_no_bp);
-        bp.run(bp_iter);
+
+        /* Run the Belief Prop iterations */
+        //int bp_niter = bp.run(bp_iter);
+        int bp_niter = 0;
+        bool bp_iter_done = false;
+        for (int i=0; i<bp_iter; i++) {
+            if (!bp_iter_done) {
+                if (bp.iterate() == 0) {
+                    bp_iter_done = true;
+                    bp_niter = i+1;
+                }
+            }
+            // Fill iter_data_out
+            for (iter_entry_t &ie : iter_data_out) {
+                if (ie.iteration == i+1) {
+                    int *decoded_msg_iter = new int[info_size];
+                    BPSK::decode(decoded_msg_iter, bp.getResult(), info_size);
+                    memcpy(&ie.data_out_bp[idx], decoded_msg_iter, size_bytes);
+                    delete [] decoded_msg_iter;
+                }
+            }
+        }
+
         encoded_msg_bpsk_received = bp.getResult(&msg_size);
 
         /* BPSK decoding with Belief Prop */
@@ -276,6 +323,9 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
         ber_total += ber;
         ber_bf_total += ber_bf;
         ber_no_ecc_total += ber_no_ecc;
+
+        bf_iter_total += bf_niter;
+        bp_iter_total += bp_niter;
 
         /* Copy decoded bits to the output */
         memcpy(&data_out_bp[idx], decoded_msg, size_bytes); // Belief Prop
@@ -300,11 +350,18 @@ void LDPC_app_base::run_data_app(LDPC_info &ldpc_info,
     ber_bf_total = ber_bf_total/blocks;
     ber_no_ecc_total = ber_no_ecc_total/blocks;
 
+    bf_iter_total = bf_iter_total/blocks;
+    bp_iter_total = bp_iter_total/blocks;
+
     /* Add an entry for the SNR */
     BER_entry_t be;
     be.BER = ber_total;
     be.BER_bf = ber_bf_total;
     be.BER_no_ecc = ber_no_ecc_total;
     be.BER_no_ecc_theoretical = BPSK::ber_theoretical(snr_db);
+    be.bf_iter_avg = bf_iter_total;
+    be.bp_iter_avg = bp_iter_total;
     ldpc_info.add_entry(snr_db, be);
+
+    cout << "BF iter avg: " << bf_iter_total << " BP iter avg: " << bp_iter_total << endl;
 }
