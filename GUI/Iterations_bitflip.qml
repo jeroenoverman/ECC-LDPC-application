@@ -17,7 +17,7 @@ Page {
 
 
     header: Label {
-        text: qsTr("Iterations BitFlipping")
+        text: qsTr("Iterations bit flipping")
         font.pixelSize: Qt.application.font.pixelSize * 2
         padding: 10
     }
