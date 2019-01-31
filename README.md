@@ -2,6 +2,11 @@
 Made by: Vito Kortbeek and Jeroen Overman
 https://github.com/jeroenoverman/ECC-LDPC-application
 
+## Runing the application (Windows)
+- Download the archive from the [release page](https://github.com/jeroenoverman/ECC-LDPC-application/releases)
+- Extract the archive
+- Run `LDPC.exe`
+
 ### NB
 _When a specific configuration is set on the first tab switching to the other tabs will lead to the program beeing unresponsive for a period of time. The application is waiting for the LDPC simulation to be completed. The duration of this period is dependent on the size of the specified demo images. **The worst-case wait time will be in the order of 10 seconds** (depending on your PC specifications). Switching tabs without chaning the settings will not lead to re-executon of the simulation, but chaning the settings will._
 
