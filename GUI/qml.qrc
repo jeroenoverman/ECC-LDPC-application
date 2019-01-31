@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Demo.qml</file>
+        <file>Graph.qml</file>
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>arrow.png</file>
+        <file>Settings.ui.qml</file>
+        <file>test1.png</file>
+        <file>Iterations.qml</file>
+        <file>Info.qml</file>
+        <file>checkerbox.png</file>
+        <file>dog.jpg</file>
+        <file>Iterations_bitflip.qml</file>
+        <file>lenna.png</file>
+    </qresource>
+</RCC>
