@@ -27,7 +27,6 @@ DataSource::DataSource(QObject *parent) :
     qRegisterMetaType<QAbstractAxis*>();
 //    qRegisterMetaType<QAbstractBarSeries*>();
 
-
     settings_changed_demo = true;
     settings_changed_graph = true;
 }
@@ -143,20 +142,6 @@ void DataSource::calculateDemo()
         ab.add_alist_files(files);
         LDPC_info ldpc_info;
 
-#if 0
-        /* Random data instead of image of 2 blocks + 42 in size */
-        int size = 324*2+42;
-        int *r_bin_signal = new int[size];
-
-        /* Generate random binary signal of 1 block (K size) */
-        auto myrand = std::bind(std::uniform_int_distribution<int>{0, 1},
-                std::mt19937(std::random_device{}()));
-
-        for (int i=0; i<size; i++) {
-            r_bin_signal[i] = myrand();
-        }
-#endif
-
         unsigned int * stream;
         stream = image_to_bits(image);
         int size = image_width * image_height * 32;
@@ -167,9 +152,27 @@ void DataSource::calculateDemo()
         int *data_out_bf = new int[size];
         int *data_out_raw = new int[size];
 
+        /* Iteration image data */
+        std::vector<iter_entry_t> iteration_data(4);
+        iteration_data.at(0).iteration = inter_it0;
+        iteration_data.at(0).data_out_bf = new int[size];
+        iteration_data.at(0).data_out_bp = new int[size];
+
+        iteration_data.at(1).iteration = inter_it1;
+        iteration_data.at(1).data_out_bf = new int[size];
+        iteration_data.at(1).data_out_bp = new int[size];
+
+        iteration_data.at(2).iteration = inter_it2;
+        iteration_data.at(2).data_out_bf = new int[size];
+        iteration_data.at(2).data_out_bp = new int[size];
+
+        iteration_data.at(3).iteration = inter_it3;
+        iteration_data.at(3).data_out_bf = new int[size];
+        iteration_data.at(3).data_out_bp = new int[size];
+
         /* Apply and reconstruct */
         ab.run_data_app(ldpc_info,
-                data_out_bp, data_out_bf, data_out_raw, (int *)stream,
+                data_out_bp, data_out_bf, data_out_raw, iteration_data, (int *)stream,
                 size, snr, max_it, ab.getMatrix(/*"H_n648-z27-r1_2.alist"*/matrix.toStdString()));
 
     //    ldpc_info.print();
@@ -187,15 +190,26 @@ void DataSource::calculateDemo()
         image_no_ecc = bits_to_image((unsigned int *)data_out_raw);
         image_bitflip = bits_to_image((unsigned int *)data_out_bf);
         image_belief = bits_to_image((unsigned int *)data_out_bp);
+
+        /* Iteration images */
+        iter0_belief = bits_to_image((unsigned int *)iteration_data.at(0).data_out_bp);
+        iter1_belief = bits_to_image((unsigned int *)iteration_data.at(1).data_out_bp);
+        iter2_belief = bits_to_image((unsigned int *)iteration_data.at(2).data_out_bp);
+        iter3_belief = bits_to_image((unsigned int *)iteration_data.at(3).data_out_bp);
+
         qDebug() << "SNR " << snr;
         delete [] stream;
         delete [] data_out_bp;
         delete [] data_out_bf;
         delete [] data_out_raw;
         settings_changed_demo = false;
+
+        /* Free iteration data */
+        for (auto &itd : iteration_data) {
+            delete [] itd.data_out_bf;
+            delete [] itd.data_out_bp;
+        }
     }
-
-
     send_demo_data();
 }
 

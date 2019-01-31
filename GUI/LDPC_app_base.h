@@ -25,7 +25,7 @@ class LDPC_app_base {
         // Run LDPC on specific blocks
 
         void run_data_app(LDPC_info &ldpc_info,
-                int *data_out_bp, int *data_out_bf, int *data_out_raw, int *data_in,
+                int *data_out_bp, int *data_out_bf, int *data_out_raw, std::vector<iter_entry_t> &iter_data_out, int *data_in,
                 int size, double snr_db, int bp_iter, struct h_matrix *hm);
 
         void print_specs() {

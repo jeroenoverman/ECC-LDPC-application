@@ -7,6 +7,7 @@
 #include <cmath>
 #include <limits>
 #include "alist.h"
+#include "bpsk.h"
 
 #include "LDPC_beliefprop.h"
 
@@ -62,18 +63,19 @@ void LDPC_BeliefProp::step_1() {
 }
 
 //https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
-template <typename T> int sgn(T val) {
-    return (T(0) < val) - (val < T(0));
-}
+//template <typename T> int sgn(T val) {
+//    return (T(0) < val) - (val < T(0));
+//}
+#define sgn(val) ((0.0 < val) - (val < 0.0))
 
 /*
  * Step 2: Check -> Var
  */
-void LDPC_BeliefProp::step_2() {
+int LDPC_BeliefProp::step_2() {
 
     // Loop row entries in H (For each check vector)
     for (int m = 0; m < H->getM(); m++) {
-        double Lnew_vec[H->num_mlist[m]];
+        double *Lnew_vec = new double[H->num_mlist[m]];
         // Loop column entries in H (For each variable entry in check vector)
         for (int midx = 0; midx < H->num_mlist[m]; midx++) {
             double minv = std::numeric_limits<double>::max();
@@ -100,6 +102,7 @@ void LDPC_BeliefProp::step_2() {
             //beliefMat[row,col_entry] = Lnew_vec(new_entry);
             *beliefMat->mlist[m][midx].value = Lnew_vec[midx];
         }
+        delete [] Lnew_vec;
     }
 
     // Sum and est
@@ -115,18 +118,53 @@ void LDPC_BeliefProp::step_2() {
         beliefMat_sumvec[n] = n_sum + L[n];
     }
 
-}
-
-void LDPC_BeliefProp::iterate() {
-    step_1();
-    step_2();
-    incrIterations();
-}
-
-void LDPC_BeliefProp::run(int iterations) {
-    for (int i=0; i<(iterations ? iterations : n_iterations); i++) {
-        iterate();
+    // If the codeword is valid, return 1 (no more iterations needed)
+    if (check_codeword()) {
+        return 0;
     }
+    return 1;
+}
+
+int LDPC_BeliefProp::check_codeword() {
+    int valid_codeword = 1;
+
+    int *decoded_codeword = new int[H->getN()];
+
+    BPSK::decode(decoded_codeword, beliefMat_sumvec, H->getN());
+
+    for (int m=0; m<H->getM(); m++) {
+        int sum = 0;
+        for(int n=0; n < H->num_mlist[m]; n++) {
+            int idx = H->mlist[m][n].idx-1;
+            sum += decoded_codeword[idx];
+        }
+
+        /* All sums should be zero in mod 2 for the codeword to be correct (parity) */
+        if ((sum % 2) == 1) {
+            valid_codeword = 0;
+            break;
+        }
+    }
+
+    delete [] decoded_codeword;
+
+    return valid_codeword;
+}
+
+int LDPC_BeliefProp::iterate() {
+    incrIterations();
+    step_1();
+    return step_2();
+}
+
+int LDPC_BeliefProp::run(int iterations) {
+    completed_iterations = 0;
+    for (int i=0; i<(iterations ? iterations : n_iterations); i++) {
+        if (iterate() == 0) {
+            break;
+        }
+    }
+    return completed_iterations;
 }
 
 void LDPC_BeliefProp::finalize(void) {

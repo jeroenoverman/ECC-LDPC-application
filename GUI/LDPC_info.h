@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <QString>
 
+#define ITER_ENTRIES 4
+
 struct h_matrix {
     std::string alist_file;
     std::string name;
@@ -22,7 +24,18 @@ typedef struct BER_entry{
     double BER_bf;
     double BER_no_ecc;
     double BER_no_ecc_theoretical;
+
+    double bf_iter_avg;
+    double bp_iter_avg;
 } BER_entry_t;
+
+typedef struct iter_entry {
+    int iteration;
+    int *data_out_bf;
+    int *data_out_bp;
+    double ber_avg_bf;
+    double ber_avg_bp;
+} iter_entry_t;
 
 class LDPC_info {
 
@@ -44,6 +57,20 @@ class LDPC_info {
             be.BER_bf = ber_bf;
             be.BER_no_ecc = ber_no_ecc;
             be.BER_no_ecc_theoretical = ber_no_ecc_th;
+
+            SNRdb_list[snr] = be;
+        }
+
+
+        void add_entry(double snr, double ber, double ber_bf, double ber_no_ecc, double ber_no_ecc_th, double bp_iter_avg, double bf_iter_avg) {
+            BER_entry_t be;
+            be.BER = ber;
+            be.BER_bf = ber_bf;
+            be.BER_no_ecc = ber_no_ecc;
+            be.BER_no_ecc_theoretical = ber_no_ecc_th;
+
+            be.bp_iter_avg = bp_iter_avg;
+            be.bf_iter_avg = bf_iter_avg;
 
             SNRdb_list[snr] = be;
         }
