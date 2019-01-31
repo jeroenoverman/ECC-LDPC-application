@@ -33,7 +33,7 @@ public slots:
 
 
 signals:
-    void send_demo_data(void);
+    void send_demo_data(float ber_orig, float ber_0, float ber_1, float ber_2, float ber_3, float ber_final, float snr, float avg_it_bp, float ber_bf_0, float ber_bf_1, float ber_bf_2, float ber_bf_3, float ber_bf_final, float avg_it_bf);
     void send_graph_data(void);
 
 
@@ -69,6 +69,11 @@ private:
     bool settings_changed_demo;
     float ber_none, ber_bitflip, ber_belief;
     float max_ber_demo;
+    float ber_iter0, ber_iter1, ber_iter2, ber_iter3;
+    float ber_bf_iter0, ber_bf_iter1, ber_bf_iter2, ber_bf_iter3;
+    float avg_iter_bf, avg_iter_bp;
+
+
 public:
     QImage image;
     QImage image_no_ecc;
@@ -78,6 +83,10 @@ public:
     QImage iter1_belief;
     QImage iter2_belief;
     QImage iter3_belief;
+    QImage iter0_bitflip;
+    QImage iter1_bitflip;
+    QImage iter2_bitflip;
+    QImage iter3_bitflip;
 private:
     int image_width;
     int image_height;
@@ -88,6 +97,7 @@ private:
     QList<QPointF> ber_none_series;
     QList<QPointF> ber_bitflip_series;
     QList<QPointF> ber_belief_series;
+    QList<QPointF> ber_theoretical_series;
     float max_ber;
 
 

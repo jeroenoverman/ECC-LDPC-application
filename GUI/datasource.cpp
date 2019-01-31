@@ -75,11 +75,13 @@ void DataSource::updateSNRGraph(QAbstractSeries *series, int type)
                 xySeries->append(ber_belief_series);
                 break;
             case 1:
-                xySeries->append(ber_none_series);
+                xySeries->append(ber_bitflip_series);
                 break;
             case 2:
-                xySeries->append(ber_bitflip_series);
-
+                xySeries->append(ber_none_series);
+                break;
+            case 3:
+                xySeries->append(ber_theoretical_series);
                 break;
         }
 
@@ -197,6 +199,25 @@ void DataSource::calculateDemo()
         iter2_belief = bits_to_image((unsigned int *)iteration_data.at(2).data_out_bp);
         iter3_belief = bits_to_image((unsigned int *)iteration_data.at(3).data_out_bp);
 
+        ber_iter0 = iteration_data.at(0).ber_avg_bp;
+        ber_iter1 = iteration_data.at(1).ber_avg_bp;
+        ber_iter2 = iteration_data.at(2).ber_avg_bp;
+        ber_iter3 = iteration_data.at(3).ber_avg_bp;
+
+        iter0_bitflip = bits_to_image((unsigned int *)iteration_data.at(0).data_out_bf);
+        iter1_bitflip = bits_to_image((unsigned int *)iteration_data.at(1).data_out_bf);
+        iter2_bitflip = bits_to_image((unsigned int *)iteration_data.at(2).data_out_bf);
+        iter3_bitflip = bits_to_image((unsigned int *)iteration_data.at(3).data_out_bf);
+
+        ber_bf_iter0 = iteration_data.at(0).ber_avg_bf;
+        ber_bf_iter1 = iteration_data.at(1).ber_avg_bf;
+        ber_bf_iter2 = iteration_data.at(2).ber_avg_bf;
+        ber_bf_iter3 = iteration_data.at(3).ber_avg_bf;
+
+
+        avg_iter_bp = ldpc_info.get_entry(snr).bp_iter_avg;
+        avg_iter_bf = ldpc_info.get_entry(snr).bf_iter_avg;
+
         qDebug() << "SNR " << snr;
         delete [] stream;
         delete [] data_out_bp;
@@ -210,7 +231,7 @@ void DataSource::calculateDemo()
             delete [] itd.data_out_bp;
         }
     }
-    send_demo_data();
+    send_demo_data(ber_none, ber_iter0, ber_iter1, ber_iter2, ber_iter3, ber_belief, snr, avg_iter_bp, ber_bf_iter0, ber_bf_iter1, ber_bf_iter2, ber_bf_iter3, ber_bitflip, avg_iter_bf);
 }
 
 void DataSource::calculateGraph()
@@ -236,18 +257,21 @@ void DataSource::calculateGraph()
         ber_none_series.clear();
         ber_bitflip_series.clear();
         ber_belief_series.clear();
+        ber_theoretical_series.clear();
         max_ber = 0;
         for (auto snr_v : ldpc_info_r1_2.get_snr_vec()) {
             ber_none_series.append(QPointF(snr_v,ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc));
             ber_bitflip_series.append(QPointF(snr_v,ldpc_info_r1_2.get_entry(snr_v).BER_bf));
             ber_belief_series.append(QPointF(snr_v,ldpc_info_r1_2.get_entry(snr_v).BER));
+            ber_theoretical_series.append(QPointF(snr_v, ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc_theoretical));
             if(ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc > max_ber)
                 max_ber = ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc;
             if(ldpc_info_r1_2.get_entry(snr_v).BER_bf > max_ber)
                 max_ber = ldpc_info_r1_2.get_entry(snr_v).BER_bf;
             if(ldpc_info_r1_2.get_entry(snr_v).BER > max_ber)
                 max_ber = ldpc_info_r1_2.get_entry(snr_v).BER;
-
+            if(ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc_theoretical > max_ber)
+                max_ber = ldpc_info_r1_2.get_entry(snr_v).BER_no_ecc_theoretical;
         }
 
         settings_changed_graph = false;

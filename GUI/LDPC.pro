@@ -38,6 +38,9 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+RC_ICONS = logo_asm_icon.ico
+
+
 HEADERS += \
     resourceimageprovider.h \
     datasource.h \

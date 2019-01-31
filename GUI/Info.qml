@@ -34,6 +34,11 @@ Page {
         anchors.margins: margin
         spacing: 10
 
+        Text {
+            id: info_text
+            text: qsTr("<h1>Test heading</h1> <b>bold text</b><p>Test paragraaf</p>")
+        }
+
     }
 
 

@@ -15,5 +15,7 @@
         <file>Info.qml</file>
         <file>checkerbox.png</file>
         <file>dog.jpg</file>
+        <file>Iterations_bitflip.qml</file>
+        <file>lenna.png</file>
     </qresource>
 </RCC>

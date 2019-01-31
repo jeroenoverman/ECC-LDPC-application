@@ -49,12 +49,13 @@ Page {
                     id: label_original
                     text: qsTr("Original")
                     anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
 
                 Image {
                     id: original_image
                     width: parent.width //0.25 *parent.width - margin
-                    height: parent.height - label_original.height
+                    height: parent.height - label_original.height - label_avg_it_bf.height
                     antialiasing: true
                     fillMode: Image.PreserveAspectFit
                     source: "image://ecc_source/original"
@@ -62,14 +63,24 @@ Page {
                 }
             }
 
-            Image {
-                id: right_arrow
-                anchors.verticalCenter: parent.verticalCenter
-                antialiasing: true
-                fillMode: Image.PreserveAspectFit
-                source: "arrow.png"
+            Column {
                 width: 0.25 * parent.width - margin
-                cache: false
+                height: parent.height
+                Label{
+                    id: snr_value
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                Image {
+                    id: right_arrow
+//                    anchors.verticalCenter: parent.verticalCenter
+                    antialiasing: true
+                    fillMode: Image.PreserveAspectFit
+                    source: "arrow.png"
+                    width: parent.width//0.25 * parent.width - margin
+                    height: parent.height - label_original.height - label_avg_it_bf.height
+                    cache: false
+                }
             }
 
             Column {
@@ -81,12 +92,13 @@ Page {
                     id: label_without
                     text: qsTr("Without ECC")
                     anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
 
                 Image {
                     id: image_without
                     width: parent.width
-                    height: parent.height - label_original.height
+                    height: parent.height - label_original.height - label_avg_it_bf.height
                     antialiasing: true
                     fillMode: Image.PreserveAspectFit
                     source: "image://ecc_source/none"
@@ -103,16 +115,21 @@ Page {
                     id: label_bitflip
                     text: qsTr("Bitflipping")
                     anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
 
                 Image {
                     id: image_bitflip
                     width: parent.width
-                    height: parent.height - label_bitflip.height
+                    height: parent.height - label_bitflip.height -label_avg_it_bf.height
                     antialiasing: true
                     fillMode: Image.PreserveAspectFit
                     source: "image://ecc_source/bitflip"
                     cache: false
+                }
+                Label {
+                    id: label_avg_it_bf
+                    anchors.horizontalCenter: parent.horizontalCenter
                 }
             }
         }
@@ -165,15 +182,20 @@ Page {
                     id: label_logli
                     text: qsTr("Loglikelihood")
                     anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
                 Image {
                     id: image_logli
                     width: parent.width
-                    height: parent.height - label_logli.height
+                    height: parent.height - label_logli.height - label_avg_it_bp.height
                     antialiasing: true
                     fillMode: Image.PreserveAspectFit
                     source: "image://ecc_source/logli"
                     cache: false
+                }
+                Label {
+                    id: label_avg_it_bp
+                    anchors.horizontalCenter: parent.horizontalCenter
                 }
             }
         }
@@ -207,6 +229,9 @@ Page {
             image_bitflip.source = "image://ecc_source/bitflip";
             image_logli.source = "";
             image_logli.source = "image://ecc_source/logli";
+            snr_value.text = qsTr("SNR: ") + qsTr(Number(snr).toFixed(1).toString()) + qsTr(" dB")
+            label_avg_it_bf.text = qsTr("Avg iterations: ") + qsTr(Number(avg_it_bf).toFixed(2).toString())
+            label_avg_it_bp.text = qsTr("Avg iterations: ") + qsTr(Number(avg_it_bp).toFixed(2).toString())
             loading_widget.visible= false
 
         }

@@ -18,12 +18,16 @@ ApplicationWindow {
 
 
         Settings {
+            id:settings
+            signal iters_changed(var iter0, var iter1, var iter2, var iter3)
 
             Component.onCompleted:  {
                 dataSource.set_image_parameters(image_select.model.get(image_select.currentIndex).value)
                 dataSource.set_AWGN_parameters(snr_demo.value)
                 dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
                 dataSource.set_graph_parameters(avg_iter.value, snr_range.first.value, snr_range.second.value, step_size.value)
+
+                iters_changed(iter0.value, iter1.value, iter2.value, iter3.value)
             }
 
             image_select {
@@ -65,21 +69,25 @@ ApplicationWindow {
             iter0{
                 onValueChanged: {
                     dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
+                    iters_changed(iter0.value, iter1.value, iter2.value, iter3.value)
                 }
             }
             iter1{
                 onValueChanged: {
                     dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
+                    iters_changed(iter0.value, iter1.value, iter2.value, iter3.value)
                 }
             }
             iter2{
                 onValueChanged: {
                     dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
+                    iters_changed(iter0.value, iter1.value, iter2.value, iter3.value)
                 }
             }
             iter3{
                 onValueChanged: {
                     dataSource.set_LDPC_parameters(h_matrix.model.get(h_matrix.currentIndex).value, decode_iter.value, iter0.value, iter1.value, iter2.value, iter3.value)
+                    iters_changed(iter0.value, iter1.value, iter2.value, iter3.value)
                 }
             }
 
@@ -144,6 +152,9 @@ ApplicationWindow {
         Iterations {
 
         }
+        Iterations_bitflip {
+
+        }
 
         Graph {
             Component.onCompleted: {
@@ -175,7 +186,10 @@ ApplicationWindow {
 
         }
         TabButton {
-            text: qsTr("Iterations")
+            text: qsTr("Iterations BP")
+        }
+        TabButton {
+            text: qsTr("Iterations BF")
         }
         TabButton {
             text: qsTr("BER vs. SNR")

@@ -44,35 +44,28 @@ Page {
 
         //Legend.visible: false
         LineSeries {
-            name: "loglikelihood"
+            name: "Belief propagation"
             axisY : valueAxisY
             axisX : valueAxisX
 
         }
         LineSeries {
-            name: "Without ECC"
+            name: "Bit flipping"
             axisY : valueAxisY
             axisX : valueAxisX
-//            XYPoint { x: 0; y: 10 }
-//            XYPoint { x: 1.1; y: 20.1 }
-//            XYPoint { x: 1.9; y: 300.3 }
-//            XYPoint { x: 2.1; y: 2000.1 }
-//            XYPoint { x: 2.9; y: 40000.9 }
-//            XYPoint { x: 3.4; y: 300000.0 }
-//            XYPoint { x: 4.1; y: 3000000.3 }
+
         }
         LineSeries {
-            name: "Bitflipping"
+            name: "No ECC"
             axisY : valueAxisY
             axisX : valueAxisX
-//            XYPoint { x: 0; y: 10 }
-//            XYPoint { x: 1.1; y: 10.1 }
-//            XYPoint { x: 1.9; y: 200.3 }
-//            XYPoint { x: 2.1; y: 3000.1 }
-//            XYPoint { x: 2.9; y: 40000.9 }
-//            XYPoint { x: 3.4; y: 500000.0 }
-//            XYPoint { x: 4.1; y: 6000000.3 }
         }
+        LineSeries {
+            name: "Theoretical no ECC"
+            axisY : valueAxisY
+            axisX : valueAxisX
+        }
+
         legend.font: Qt.font({pointSize: 16})
 
     }
@@ -83,6 +76,7 @@ Page {
             dataSource.updateSNRGraph(chartView.series(0),0);
             dataSource.updateSNRGraph(chartView.series(1),1);
             dataSource.updateSNRGraph(chartView.series(2),2);
+            dataSource.updateSNRGraph(chartView.series(3),3);
             dataSource.updateSNRAxis(chartView.axisX(chartView.series(0)),chartView.axisY(chartView.series(0)))
 
         }
@@ -92,7 +86,7 @@ Page {
         onPage_changed: {
 
             console.log("(graph) page changed: " + number)
-            if (number == 3){
+            if (number == 4){
 
                 dataSource.calculateGraph()
             }

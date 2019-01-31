@@ -76,6 +76,18 @@ QImage ResourceImageProvider::requestImage(const QString& id, QSize* size, const
     if(id == "iter3_belief") {
         image = source->iter3_belief;
     }
+    if(id == "iter0_bitflip") {
+        image = source->iter0_bitflip;
+    }
+    if(id == "iter1_bitflip") {
+        image = source->iter1_bitflip;
+    }
+    if(id == "iter2_bitflip") {
+        image = source->iter2_bitflip;
+    }
+    if(id == "iter3_bitflip") {
+        image = source->iter3_bitflip;
+    }
 
     if (requestedSize.isValid()) {
         result = image.scaled(requestedSize, Qt::KeepAspectRatio);

@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.12
 
 
 Page {
-    id: iterations_page
+    id: iterations_bitflip_page
     width: 600
     height: 400
 
@@ -17,7 +17,7 @@ Page {
 
 
     header: Label {
-        text: qsTr("Iterations belief propagation")
+        text: qsTr("Iterations BitFlipping")
         font.pixelSize: Qt.application.font.pixelSize * 2
         padding: 10
     }
@@ -202,22 +202,22 @@ Page {
             iter_0_image.source = "";
             iter_0_image.source = "image://ecc_source/none";
             iter_1_image.source = "";
-            iter_1_image.source = "image://ecc_source/iter0_belief";
+            iter_1_image.source = "image://ecc_source/iter0_bitflip";
             iter_2_image.source = "";
-            iter_2_image.source = "image://ecc_source/iter1_belief";
+            iter_2_image.source = "image://ecc_source/iter1_bitflip";
             iter_3_image.source = "";
-            iter_3_image.source = "image://ecc_source/iter2_belief";
+            iter_3_image.source = "image://ecc_source/iter2_bitflip";
             iter_4_image.source = "";
-            iter_4_image.source = "image://ecc_source/iter3_belief";
+            iter_4_image.source = "image://ecc_source/iter3_bitflip";
             iter_5_image.source = "";
-            iter_5_image.source = "image://ecc_source/logli";
+            iter_5_image.source = "image://ecc_source/bitflip";
 
             label_it_0_1.text = qsTr("BER: ") + qsTr(Number(ber_orig).toFixed(3).toString())
-            label_it_1_1.text = qsTr("BER: ") + qsTr(Number(ber_0).toFixed(3).toString())
-            label_it_2_1.text = qsTr("BER: ") + qsTr(Number(ber_1).toFixed(3).toString())
-            label_it_3_1.text = qsTr("BER: ") + qsTr(Number(ber_2).toFixed(3).toString())
-            label_it_4_1.text = qsTr("BER: ") + qsTr(Number(ber_3).toFixed(3).toString())
-            label_it_5_1.text = qsTr("BER: ") + qsTr(Number(ber_final).toFixed(3).toString())
+            label_it_1_1.text = qsTr("BER: ") + qsTr(Number(ber_bf_0).toFixed(3).toString())
+            label_it_2_1.text = qsTr("BER: ") + qsTr(Number(ber_bf_1).toFixed(3).toString())
+            label_it_3_1.text = qsTr("BER: ") + qsTr(Number(ber_bf_2).toFixed(3).toString())
+            label_it_4_1.text = qsTr("BER: ") + qsTr(Number(ber_bf_3).toFixed(3).toString())
+            label_it_5_1.text = qsTr("BER: ") + qsTr(Number(ber_bf_final).toFixed(3).toString())
 
 
         }
@@ -227,7 +227,7 @@ Page {
         onPage_changed: {
 
             console.log("(Iterations) page changed: " + number)
-            if (number == 2){
+            if (number == 3){
                 dataSource.calculateDemo()
             }
         }
